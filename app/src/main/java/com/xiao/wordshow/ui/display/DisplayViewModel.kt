@@ -20,6 +20,9 @@ class DisplayViewModel : ViewModel() {
     private val _fontSize = MutableStateFlow(64f)
     val fontSize: StateFlow<Float> = _fontSize.asStateFlow()
 
+    private val _scrollSpeed = MutableStateFlow(1f)
+    val scrollSpeed: StateFlow<Float> = _scrollSpeed.asStateFlow()
+
     private val _currentEffect = MutableStateFlow(TextEffect.NONE)
     val currentEffect: StateFlow<TextEffect> = _currentEffect.asStateFlow()
 
@@ -32,7 +35,11 @@ class DisplayViewModel : ViewModel() {
     }
 
     fun setFontSize(size: Float) {
-        _fontSize.value = size.coerceIn(20f, 200f)
+        _fontSize.value = size.coerceIn(20f, 400f)
+    }
+
+    fun setScrollSpeed(speed: Float) {
+        _scrollSpeed.value = speed.coerceIn(0.2f, 3f)
     }
 
     fun setEffect(effect: TextEffect) {

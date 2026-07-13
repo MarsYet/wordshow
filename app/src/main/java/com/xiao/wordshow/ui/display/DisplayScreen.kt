@@ -56,6 +56,7 @@ fun DisplayScreen(
     val isFullscreen by displayViewModel.isFullscreen.collectAsState()
     val fontSize by displayViewModel.fontSize.collectAsState()
     val currentEffect by displayViewModel.currentEffect.collectAsState()
+    val scrollSpeed by displayViewModel.scrollSpeed.collectAsState()
 
     val activity = LocalContext.current as ComponentActivity
 
@@ -88,6 +89,7 @@ fun DisplayScreen(
             ScrollingText(
                 text = text,
                 fontSize = fontSize.sp,
+                speed = scrollSpeed,
                 effectType = currentEffect
             )
         } else {
@@ -108,6 +110,15 @@ fun DisplayScreen(
                 onFontSizeChange = displayViewModel::setFontSize,
                 isFullscreen = isFullscreen
             )
+
+            // 滚动速度滑块（仅滚动模式）
+            if (isScrolling) {
+                SpeedSlider(
+                    speed = scrollSpeed,
+                    onSpeedChange = displayViewModel::setScrollSpeed,
+                    isFullscreen = isFullscreen
+                )
+            }
 
             // 控制按钮栏
             Row(
@@ -211,7 +222,7 @@ private fun FontSizeSlider(
         Slider(
             value = fontSize,
             onValueChange = onFontSizeChange,
-            valueRange = 20f..200f,
+            valueRange = 20f..400f,
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 8.dp),
@@ -234,6 +245,63 @@ private fun FontSizeSlider(
         // 字号数值标签
         Text(
             text = "${fontSize.toInt()}",
+            style = MaterialTheme.typography.labelSmall,
+            color = textColor.copy(alpha = 0.7f),
+            modifier = Modifier.padding(start = 8.dp)
+        )
+    }
+}
+
+/**
+ * 滚动速度调节滑块
+ */
+@Composable
+private fun SpeedSlider(
+    speed: Float,
+    onSpeedChange: (Float) -> Unit,
+    isFullscreen: Boolean
+) {
+    val textColor = if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
+    val bgColor = if (isFullscreen) Color.Black.copy(alpha = 0.4f)
+                  else MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(bgColor)
+            .padding(horizontal = 12.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "🐢",
+            style = MaterialTheme.typography.labelSmall,
+            color = textColor.copy(alpha = 0.7f)
+        )
+
+        Slider(
+            value = speed,
+            onValueChange = onSpeedChange,
+            valueRange = 0.2f..3f,
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 8.dp),
+            colors = SliderDefaults.colors(
+                thumbColor = if (isFullscreen) Color.White else MaterialTheme.colorScheme.primary,
+                activeTrackColor = if (isFullscreen) Color.White.copy(alpha = 0.8f)
+                                   else MaterialTheme.colorScheme.primary,
+                inactiveTrackColor = if (isFullscreen) Color.White.copy(alpha = 0.3f)
+                                     else MaterialTheme.colorScheme.surfaceContainerHighest
+            )
+        )
+
+        Text(
+            text = "🐇",
+            style = MaterialTheme.typography.labelSmall,
+            color = textColor.copy(alpha = 0.7f)
+        )
+
+        Text(
+            text = "×${String.format("%.1f", speed)}",
             style = MaterialTheme.typography.labelSmall,
             color = textColor.copy(alpha = 0.7f),
             modifier = Modifier.padding(start = 8.dp)
