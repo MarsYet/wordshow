@@ -30,6 +30,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardVoice
@@ -214,12 +216,17 @@ fun InputScreen(
 
             Button(
                 onClick = onNavigateToDisplay,
-                modifier = Modifier.fillMaxWidth().height(52.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .shadow(6.dp, RoundedCornerShape(26.dp), spotColor = Color.Black.copy(alpha = 0.3f)),
                 enabled = text.isNotBlank(),
                 shape = RoundedCornerShape(26.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                    containerColor = Color(0xFF3A3A3A),
+                    contentColor = Color.White,
+                    disabledContainerColor = Color(0xFF222222),
+                    disabledContentColor = Color(0xFF666666),
                 )
             ) {
                 Text("进入显示", style = MaterialTheme.typography.titleMedium)

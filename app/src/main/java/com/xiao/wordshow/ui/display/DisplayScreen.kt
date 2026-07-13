@@ -54,6 +54,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -188,13 +189,18 @@ fun DisplayScreen(
                         maxSpeed = adaptive.maxScrollSpeed
                     )
                 }
-                // 液态玻璃控制栏
+                // 拟物化控制栏 — 凸起面板 + 哑光金属质感
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 4.dp)
-                        .glassBg(isFullscreen, RoundedCornerShape(20.dp))
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                        .shadow(4.dp, RoundedCornerShape(18.dp), ambientColor = Color.White.copy(alpha = 0.05f), spotColor = Color.Black.copy(alpha = 0.4f))
+                        .background(
+                            Brush.verticalGradient(listOf(Color(0xFF3A3A3A), Color(0xFF2A2A2A), Color(0xFF222222))),
+                            RoundedCornerShape(18.dp)
+                        )
+                        .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(18.dp))
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -257,8 +263,13 @@ private fun FontSizeSlider(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp)
-            .glassBg(isFullscreen, RoundedCornerShape(14.dp))
+            .padding(horizontal = 10.dp)
+            .shadow(3.dp, RoundedCornerShape(12.dp), ambientColor = Color.White.copy(alpha = 0.03f), spotColor = Color.Black.copy(alpha = 0.35f))
+            .background(
+                Brush.verticalGradient(listOf(Color(0xFF353535), Color(0xFF282828))),
+                RoundedCornerShape(12.dp)
+            )
+            .border(0.5.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(12.dp))
             .padding(horizontal = 8.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -277,11 +288,9 @@ private fun FontSizeSlider(
                 .weight(1f)
                 .padding(horizontal = 8.dp),
             colors = SliderDefaults.colors(
-                thumbColor = if (isFullscreen) Color.White else MaterialTheme.colorScheme.primary,
-                activeTrackColor = if (isFullscreen) Color.White.copy(alpha = 0.8f)
-                                   else MaterialTheme.colorScheme.primary,
-                inactiveTrackColor = if (isFullscreen) Color.White.copy(alpha = 0.3f)
-                                     else MaterialTheme.colorScheme.surfaceContainerHighest
+                thumbColor = Color(0xFFE0E0E0),
+                activeTrackColor = Color(0xFFAAAAAA),
+                inactiveTrackColor = Color(0xFF3A3A3A),
             )
         )
 
@@ -317,8 +326,13 @@ private fun SpeedSlider(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp)
-            .glassBg(isFullscreen, RoundedCornerShape(14.dp))
+            .padding(horizontal = 10.dp)
+            .shadow(3.dp, RoundedCornerShape(12.dp), ambientColor = Color.White.copy(alpha = 0.03f), spotColor = Color.Black.copy(alpha = 0.35f))
+            .background(
+                Brush.verticalGradient(listOf(Color(0xFF353535), Color(0xFF282828))),
+                RoundedCornerShape(12.dp)
+            )
+            .border(0.5.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(12.dp))
             .padding(horizontal = 8.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -336,11 +350,9 @@ private fun SpeedSlider(
                 .weight(1f)
                 .padding(horizontal = 8.dp),
             colors = SliderDefaults.colors(
-                thumbColor = if (isFullscreen) Color.White else MaterialTheme.colorScheme.primary,
-                activeTrackColor = if (isFullscreen) Color.White.copy(alpha = 0.8f)
-                                   else MaterialTheme.colorScheme.primary,
-                inactiveTrackColor = if (isFullscreen) Color.White.copy(alpha = 0.3f)
-                                     else MaterialTheme.colorScheme.surfaceContainerHighest
+                thumbColor = Color(0xFFE0E0E0),
+                activeTrackColor = Color(0xFFAAAAAA),
+                inactiveTrackColor = Color(0xFF3A3A3A),
             )
         )
 

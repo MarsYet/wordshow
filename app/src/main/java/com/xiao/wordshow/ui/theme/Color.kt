@@ -2,24 +2,14 @@ package com.xiao.wordshow.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Apple 极简调色板
-val AppleBg = Color(0xFFF5F5F7)
-val AppleSurface = Color(0xFFFFFFFF)
-val AppleGray = Color(0xFFE8E8ED)
-val AppleText = Color(0xFF1D1D1F)
-val AppleTextSecondary = Color(0xFF86868B)
-val AppleBlue = Color(0xFF007AFF)
-val AppleRed = Color(0xFFFF3B30)
-
-// 液态玻璃
-val GlassLight = Color(0xB3FFFFFF)
-val GlassDark = Color(0xB31C1C1E)
-val GlassBorder = Color(0x1A000000)
-
-// 旧色保留（兼容）
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// 黑白灰极简调色板
+val Mono0 = Color(0xFF000000)
+val Mono10 = Color(0xFF1A1A1A)
+val Mono15 = Color(0xFF262626)
+val Mono20 = Color(0xFF333333)
+val Mono30 = Color(0xFF4D4D4D)
+val Mono50 = Color(0xFF808080)
+val Mono70 = Color(0xFFB3B3B3)
+val Mono85 = Color(0xFFD9D9D9)
+val Mono95 = Color(0xFFF2F2F2)
+val Mono100 = Color(0xFFFFFFFF)
