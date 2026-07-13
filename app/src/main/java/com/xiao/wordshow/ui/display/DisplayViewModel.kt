@@ -16,11 +16,18 @@ class DisplayViewModel : ViewModel() {
     private val _isFullscreen = MutableStateFlow(false)
     val isFullscreen: StateFlow<Boolean> = _isFullscreen.asStateFlow()
 
+    private val _fontSize = MutableStateFlow(64f)
+    val fontSize: StateFlow<Float> = _fontSize.asStateFlow()
+
     fun toggleScrolling() {
         _isScrolling.value = !_isScrolling.value
     }
 
     fun toggleFullscreen() {
         _isFullscreen.value = !_isFullscreen.value
+    }
+
+    fun setFontSize(size: Float) {
+        _fontSize.value = size.coerceIn(20f, 200f)
     }
 }
