@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -147,7 +148,8 @@ fun EffectText(
 }
 
 /**
- * 静态显示专用 — 居中 + 多行 + padding
+ * 静态显示专用 — 居中 + 多行 + 自适应缩放
+ * 文字越长自动缩小，确保完全显示在屏幕内
  */
 @Composable
 fun TextEffects(
@@ -156,6 +158,16 @@ fun TextEffects(
     fontSize: TextUnit = 64.sp,
     modifier: Modifier = Modifier
 ) {
+    val baseSp = fontSize.value
+    // 自适应缩放：短字大，长字小。64sp下约每行5个中文字，10行≈50字满屏
+    val adaptiveSp = remember(text, baseSp) {
+        val charCount = text.length.coerceAtLeast(1)
+        // 满屏参考字符数（基于中文字宽≈字号）
+        val fullScreenChars = 50f
+        val scale = (fullScreenChars / charCount).coerceIn(0.25f, 1f)
+        (baseSp * scale).coerceAtLeast(16f)
+    }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -166,8 +178,8 @@ fun TextEffects(
         EffectText(
             text = text,
             effectType = effectType,
-            fontSize = fontSize,
-            maxLines = 10,
+            fontSize = adaptiveSp.sp,
+            maxLines = 20,
             softWrap = true,
             textAlign = TextAlign.Center
         )
