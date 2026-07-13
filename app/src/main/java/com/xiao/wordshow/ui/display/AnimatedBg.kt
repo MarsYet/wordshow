@@ -7,105 +7,109 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.unit.dp
-import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.math.PI
 
 /**
- * 深蓝紫径向渐变背景 + 3个缓慢漂移的彩色光晕
+ * 纯 Canvas 绘制的深色星空背景 — 3个柔和光池缓慢漂移，无硬边无条纹
  */
 @Composable
 fun AnimatedBackground(modifier: Modifier = Modifier) {
-    val config = LocalConfiguration.current
-    val screenW = config.screenWidthDp.dp.value
-    val screenH = config.screenHeightDp.dp.value
-    val centerX = screenW / 2
-    val centerY = screenH / 2
+    val t = rememberInfiniteTransition(label = "abg")
 
-    val transition = rememberInfiniteTransition(label = "bg")
+    val a1 by t.animateFloat(0f, 360f,
+        infiniteRepeatable(tween(18000, easing = LinearEasing), RepeatMode.Restart), "a1")
+    val a2 by t.animateFloat(120f, 480f,
+        infiniteRepeatable(tween(22000, easing = LinearEasing), RepeatMode.Restart), "a2")
+    val a3 by t.animateFloat(240f, 600f,
+        infiniteRepeatable(tween(26000, easing = LinearEasing), RepeatMode.Restart), "a3")
 
-    // 光晕角度
-    val orbit1 by transition.animateFloat(0f, 360f,
-        infiniteRepeatable(tween(20000, easing = LinearEasing), RepeatMode.Restart), "o1")
-    val orbit2 by transition.animateFloat(120f, 480f,
-        infiniteRepeatable(tween(25000, easing = LinearEasing), RepeatMode.Restart), "o2")
-    val orbit3 by transition.animateFloat(240f, 600f,
-        infiniteRepeatable(tween(30000, easing = LinearEasing), RepeatMode.Restart), "o3")
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+        val cx = w / 2f
+        val cy = h / 2f
+        val r = maxOf(w, h) * 0.7f
 
-    val radius = maxOf(screenW, screenH) * 0.6f
-
-    val orb1X = centerX + cos(orbit1 * PI / 180f) * radius * 0.6f
-    val orb1Y = centerY + sin(orbit1 * PI / 180f) * radius * 0.5f
-    val orb2X = centerX + cos(orbit2 * PI / 180f) * radius * 0.45f
-    val orb2Y = centerY + sin(orbit2 * PI / 180f) * radius * 0.55f
-    val orb3X = centerX + cos(orbit3 * PI / 180f) * radius * 0.5f
-    val orb3Y = centerY + sin(orbit3 * PI / 180f) * radius * 0.4f
-
-    Box(modifier = modifier.fillMaxSize()) {
-        // 径向渐变底层
-        Canvas(Modifier.fillMaxSize()) {
-            drawRect(
-                Brush.radialGradient(
-                    colors = listOf(
-                        Color(0xFF2D1B69),
-                        Color(0xFF1A1A2E),
-                        Color(0xFF0F0F23),
-                        Color(0xFF0A0A1A)
-                    ),
-                    center = Offset(size.width / 2, size.height / 2),
-                    radius = size.maxDimension * 0.8f
-                )
+        // 基底渐变
+        drawRect(
+            Brush.radialGradient(
+                colors = listOf(
+                    Color(0xFF1C1C2E),
+                    Color(0xFF141428),
+                    Color(0xFF0C0C1E),
+                    Color(0xFF060614)
+                ),
+                center = Offset(cx, cy),
+                radius = r * 1.4f
             )
-        }
-
-        // 光晕 1 - 紫色
-        Box(
-            Modifier
-                .offset(x = orb1X.dp, y = orb1Y.dp)
-                .size((screenW * 0.5f).dp)
-                .graphicsLayer { alpha = 0.35f }
-                .blur(60.dp)
-                .clip(CircleShape)
-                .background(Color(0xFF7B2FFF))
         )
 
-        // 光晕 2 - 蓝色
-        Box(
-            Modifier
-                .offset(x = orb2X.dp, y = orb2Y.dp)
-                .size((screenW * 0.4f).dp)
-                .graphicsLayer { alpha = 0.3f }
-                .blur(50.dp)
-                .clip(CircleShape)
-                .background(Color(0xFF3366FF))
+        // 光池 1 — 靛蓝，极大半径 = 没有圆形边界感
+        drawCircle(
+            Brush.radialGradient(
+                colors = listOf(
+                    Color(0x1E6688FF),
+                    Color(0x0E3366CC),
+                    Color(0x00000000)
+                ),
+                center = Offset(
+                    cx + cos(a1 * PI / 180.0).toFloat() * r * 0.3f,
+                    cy + sin(a1 * PI / 180.0).toFloat() * r * 0.25f
+                ),
+                radius = r * 0.8f
+            ),
+            radius = r * 0.8f
         )
 
-        // 光晕 3 - 青粉
-        Box(
-            Modifier
-                .offset(x = orb3X.dp, y = orb3Y.dp)
-                .size((screenW * 0.35f).dp)
-                .graphicsLayer { alpha = 0.25f }
-                .blur(40.dp)
-                .clip(CircleShape)
-                .background(Color(0xFFFF4488))
+        // 光池 2 — 紫罗兰
+        drawCircle(
+            Brush.radialGradient(
+                colors = listOf(
+                    Color(0x168855EE),
+                    Color(0x084422AA),
+                    Color(0x00000000)
+                ),
+                center = Offset(
+                    cx + cos(a2 * PI / 180.0).toFloat() * r * 0.45f,
+                    cy + sin(a2 * PI / 180.0).toFloat() * r * 0.35f
+                ),
+                radius = r * 0.65f
+            ),
+            radius = r * 0.65f
+        )
+
+        // 光池 3 — 青蓝
+        drawCircle(
+            Brush.radialGradient(
+                colors = listOf(
+                    Color(0x12228899),
+                    Color(0x06115577),
+                    Color(0x00000000)
+                ),
+                center = Offset(
+                    cx + cos(a3 * PI / 180.0).toFloat() * r * 0.35f,
+                    cy + sin(a3 * PI / 180.0).toFloat() * r * 0.4f
+                ),
+                radius = r * 0.55f
+            ),
+            radius = r * 0.55f
+        )
+
+        // 暗角
+        drawRect(
+            Brush.radialGradient(
+                colors = listOf(Color(0x00000000), Color(0x00000000), Color(0x2A000000)),
+                center = Offset(cx, cy),
+                radius = r * 1.2f
+            )
         )
     }
 }
