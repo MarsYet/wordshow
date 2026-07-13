@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.xiao.wordshow.data.model.TextEffect
 import com.xiao.wordshow.ui.display.components.ScrollingText
 import com.xiao.wordshow.ui.display.components.TextEffects
 import com.xiao.wordshow.ui.input.InputViewModel
@@ -159,7 +160,7 @@ fun DisplayScreen(
                     Icon(
                         imageVector = Icons.Filled.AutoFixHigh,
                         contentDescription = "切换特效",
-                        tint = if (currentEffect != com.xiao.wordshow.data.model.TextEffect.NONE)
+                        tint = if (currentEffect != TextEffect.NONE)
                             if (isFullscreen) Color(0xFFFFD93D) else MaterialTheme.colorScheme.tertiary
                         else
                             if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
