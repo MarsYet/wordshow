@@ -41,6 +41,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -89,7 +90,11 @@ fun DisplayScreen(
     }
 
     Column(modifier = modifier.fillMaxSize()) {
-        // 文字显示区 — 占据控制栏上方全部空间，始终在可用区域正中
+        // 文字显示区 — 占据控制栏上方全部空间
+        // 280sp 以上中轴上移，避免大字被底部控制栏裁切
+        val bias = -((fontSize - 280f) * 0.005f).coerceIn(0f, 0.5f)
+        val align = remember(bias) { BiasAlignment(0f, bias) }
+
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -99,7 +104,7 @@ fun DisplayScreen(
                         Modifier.pointerInput(Unit) { detectTapGestures { showControls = true } }
                     } else Modifier
                 ),
-            contentAlignment = Alignment.Center
+            contentAlignment = align
         ) {
             if (text.isBlank()) {
                 Text(
