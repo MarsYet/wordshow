@@ -93,8 +93,8 @@ fun DisplayScreen(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        // 大字上偏：64sp=正中, 每增大1sp上移0.25%, 最大偏上40%
-        val bias = -((fontSize - 64f) * 0.0025f).coerceIn(0f, 0.4f)
+        // 大字上偏：64sp=正中, 每增大1sp上移0.2%, 最大偏上65%
+        val bias = -((fontSize - 64f) * 0.002f).coerceIn(0f, 0.65f)
         val contentAlign = remember(bias) {
             BiasAlignment(0f, bias)
         }
