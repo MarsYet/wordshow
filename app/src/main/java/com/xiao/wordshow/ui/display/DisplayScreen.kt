@@ -86,27 +86,26 @@ fun DisplayScreen(
         }
     }
 
-    // 缓存首次判断，避免横屏后宽度变化导致 isPhone 翻转
     val isPhone = remember { adaptive.maxFontSize <= 300f }
 
-    DisposableEffect(isFullscreen) {
-        if (isFullscreen) {
+    fun doToggleFullscreen() {
+        val willBeFullscreen = !isFullscreen
+        if (willBeFullscreen) {
+            // 手机先锁横屏，再进全屏
+            if (isPhone) activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
             FullscreenUtil.enterFullscreen(activity)
-            if (isPhone) {
-                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-            }
         } else {
             FullscreenUtil.exitFullscreen(activity)
-            if (isPhone) {
-                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-            }
+            if (isPhone) activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             showControls = true
         }
+        displayViewModel.toggleFullscreen()
+    }
+
+    // 离开此页面时恢复竖屏
+    DisposableEffect(Unit) {
         onDispose {
-            FullscreenUtil.exitFullscreen(activity)
-            if (isPhone) {
-                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-            }
+            if (isPhone) activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         }
     }
 
@@ -182,7 +181,7 @@ fun DisplayScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = {
-                        if (isFullscreen) displayViewModel.toggleFullscreen()
+                        if (isFullscreen) doToggleFullscreen()
                         onNavigateBack()
                     }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回",
@@ -211,7 +210,7 @@ fun DisplayScreen(
                     }
                     IconButton(onClick = {
                         showControls = true
-                        displayViewModel.toggleFullscreen()
+                        doToggleFullscreen()
                     }) {
                         Icon(
                             if (isFullscreen) Icons.Filled.FullscreenExit else Icons.Filled.Fullscreen,
