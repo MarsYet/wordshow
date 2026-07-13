@@ -180,7 +180,7 @@ fun InputScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("输入文字", style = MaterialTheme.typography.headlineMedium)
+            Text("输入文字", style = MaterialTheme.typography.headlineMedium, color = Color.White)
             Spacer(modifier = Modifier.height(24.dp))
 
             Row(
