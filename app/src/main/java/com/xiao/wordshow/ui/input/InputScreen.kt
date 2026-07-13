@@ -13,7 +13,9 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,7 +47,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -172,8 +174,8 @@ fun InputScreen(
 }
 
 /**
- * 按住说话按钮 — 按下开始录音，松开无操作（系统识别自动结束）
- * 用 Box + pointerInput 代替 IconButton，避免内置 clickable 拦截手势
+ * 按住说话按钮 — 手指按下即触发录音，松开无操作（系统识别自动结束）
+ * 使用 MutableInteractionSource.collectIsPressedAsState 可靠检测按压状态
  */
 @Composable
 private fun HoldToTalkButton(
@@ -181,6 +183,16 @@ private fun HoldToTalkButton(
     onPress: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    // 按下瞬间触发录音（仅触发一次，由 isListening 防重复）
+    LaunchedEffect(isPressed) {
+        if (isPressed && !isListening) {
+            onPress()
+        }
+    }
+
     // 呼吸动画（聆听中）
     val pulseAlpha by if (isListening) {
         rememberInfiniteTransition(label = "pulse").animateFloat(
@@ -198,6 +210,8 @@ private fun HoldToTalkButton(
 
     val containerColor = if (isListening)
         MaterialTheme.colorScheme.errorContainer
+    else if (isPressed)
+        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
     else
         MaterialTheme.colorScheme.primaryContainer
 
@@ -211,14 +225,11 @@ private fun HoldToTalkButton(
             .size(56.dp)
             .clip(CircleShape)
             .background(containerColor)
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = {
-                        onPress()
-                        tryAwaitRelease()
-                    }
-                )
-            },
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,  // 无涟漪，用背景色变化反馈
+                onClick = { /* 按压已由 LaunchedEffect 处理 */ }
+            ),
         contentAlignment = Alignment.Center
     ) {
         Icon(
