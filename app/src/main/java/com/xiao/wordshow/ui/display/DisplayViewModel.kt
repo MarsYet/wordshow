@@ -1,12 +1,13 @@
 package com.xiao.wordshow.ui.display
 
 import androidx.lifecycle.ViewModel
+import com.xiao.wordshow.data.model.TextEffect
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * 显示页 ViewModel — 管理显示模式（静止/滚动）、全屏状态
+ * 显示页 ViewModel — 管理显示模式、全屏、字体、特效状态
  */
 class DisplayViewModel : ViewModel() {
 
@@ -19,6 +20,9 @@ class DisplayViewModel : ViewModel() {
     private val _fontSize = MutableStateFlow(64f)
     val fontSize: StateFlow<Float> = _fontSize.asStateFlow()
 
+    private val _currentEffect = MutableStateFlow(TextEffect.NONE)
+    val currentEffect: StateFlow<TextEffect> = _currentEffect.asStateFlow()
+
     fun toggleScrolling() {
         _isScrolling.value = !_isScrolling.value
     }
@@ -29,5 +33,15 @@ class DisplayViewModel : ViewModel() {
 
     fun setFontSize(size: Float) {
         _fontSize.value = size.coerceIn(20f, 200f)
+    }
+
+    fun setEffect(effect: TextEffect) {
+        _currentEffect.value = effect
+    }
+
+    fun cycleEffect() {
+        val effects = TextEffect.entries
+        val nextIndex = (effects.indexOf(_currentEffect.value) + 1) % effects.size
+        _currentEffect.value = effects[nextIndex]
     }
 }

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.FullscreenExit
 import androidx.compose.material.icons.filled.PlayArrow
@@ -38,7 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.xiao.wordshow.ui.display.components.ScrollingText
-import com.xiao.wordshow.ui.display.components.StaticText
+import com.xiao.wordshow.ui.display.components.TextEffects
 import com.xiao.wordshow.ui.input.InputViewModel
 import com.xiao.wordshow.util.FullscreenUtil
 
@@ -53,6 +54,7 @@ fun DisplayScreen(
     val isScrolling by displayViewModel.isScrolling.collectAsState()
     val isFullscreen by displayViewModel.isFullscreen.collectAsState()
     val fontSize by displayViewModel.fontSize.collectAsState()
+    val currentEffect by displayViewModel.currentEffect.collectAsState()
 
     val activity = LocalContext.current as ComponentActivity
 
@@ -82,9 +84,17 @@ fun DisplayScreen(
                 )
             }
         } else if (isScrolling) {
-            ScrollingText(text = text, fontSize = fontSize.sp)
+            ScrollingText(
+                text = text,
+                fontSize = fontSize.sp,
+                effectType = currentEffect
+            )
         } else {
-            StaticText(text = text, fontSize = fontSize.sp)
+            TextEffects(
+                text = text,
+                fontSize = fontSize.sp,
+                effectType = currentEffect
+            )
         }
 
         // 底部控制区
@@ -141,6 +151,18 @@ fun DisplayScreen(
                         imageVector = if (isScrolling) Icons.Filled.Stop else Icons.Filled.PlayArrow,
                         contentDescription = if (isScrolling) "切换为静止" else "切换为滚动",
                         tint = if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                // 特效切换
+                IconButton(onClick = { displayViewModel.cycleEffect() }) {
+                    Icon(
+                        imageVector = Icons.Filled.AutoFixHigh,
+                        contentDescription = "切换特效",
+                        tint = if (currentEffect != com.xiao.wordshow.data.model.TextEffect.NONE)
+                            if (isFullscreen) Color(0xFFFFD93D) else MaterialTheme.colorScheme.tertiary
+                        else
+                            if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
                     )
                 }
 
