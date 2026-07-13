@@ -91,15 +91,10 @@ fun DisplayScreen(
         onDispose { FullscreenUtil.exitFullscreen(activity) }
     }
 
-    // 底部控制栏大约高度（用于主内容区 padding 避免覆盖）
-    val controlsHeight = if (isScrolling) 144.dp else 104.dp
-
     Box(modifier = modifier.fillMaxSize()) {
-        // 主显示区域 — 底部留出控制栏空间
+        // 主显示区域 — 始终在整个屏幕内居中，不加 padding
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = if (controlsVisible) controlsHeight else 0.dp),
+            modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             if (text.isBlank()) {
