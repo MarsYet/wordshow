@@ -1,6 +1,7 @@
 package com.xiao.wordshow.ui.display
 
 import android.content.pm.ActivityInfo
+import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -45,7 +46,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
@@ -178,12 +181,7 @@ fun DisplayScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 12.dp, vertical = 4.dp)
-                        .background(
-                            if (isFullscreen) Color.Black.copy(alpha = 0.45f)
-                            else Color.White.copy(alpha = 0.72f),
-                            RoundedCornerShape(20.dp)
-                        )
-                        .border(0.5.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(20.dp))
+                        .glassBg(isFullscreen, RoundedCornerShape(20.dp))
                         .padding(horizontal = 12.dp, vertical = 6.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
@@ -243,15 +241,12 @@ private fun FontSizeSlider(
     range: ClosedFloatingPointRange<Float>
 ) {
     val textColor = if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
-    val glassBg = if (isFullscreen) Color.Black.copy(alpha = 0.35f)
-                  else Color.White.copy(alpha = 0.65f)
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
-            .background(glassBg, RoundedCornerShape(14.dp))
-            .border(0.5.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(14.dp))
+            .glassBg(isFullscreen, RoundedCornerShape(14.dp))
             .padding(horizontal = 8.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -306,15 +301,12 @@ private fun SpeedSlider(
     maxSpeed: Float
 ) {
     val textColor = if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
-    val glassBg = if (isFullscreen) Color.Black.copy(alpha = 0.35f)
-                  else Color.White.copy(alpha = 0.65f)
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
-            .background(glassBg, RoundedCornerShape(14.dp))
-            .border(0.5.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(14.dp))
+            .glassBg(isFullscreen, RoundedCornerShape(14.dp))
             .padding(horizontal = 8.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -353,4 +345,20 @@ private fun SpeedSlider(
             modifier = Modifier.padding(start = 8.dp)
         )
     }
+}
+
+/**
+ * 液态玻璃 Modifier — blur + 半透明背景 + 细边框
+ */
+private fun Modifier.glassBg(isFullscreen: Boolean, shape: androidx.compose.ui.graphics.Shape): Modifier {
+    val bgColor = if (isFullscreen) Color.Black.copy(alpha = 0.5f)
+                  else Color.White.copy(alpha = 0.7f)
+    val borderColor = Color.White.copy(alpha = if (isFullscreen) 0.12f else 0.3f)
+
+    return this
+        .then(
+            if (Build.VERSION.SDK_INT >= 31) Modifier.blur(12.dp) else Modifier
+        )
+        .background(bgColor, shape)
+        .border(0.5.dp, borderColor, shape)
 }
