@@ -34,6 +34,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardVoice
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -188,9 +189,16 @@ fun InputScreen(
                     value = text,
                     onValueChange = inputViewModel::updateText,
                     modifier = Modifier.weight(1f),
-                    label = { Text("请输入要显示的文字") },
+                    label = { Text("输入文字...") },
                     maxLines = 5,
-                    textStyle = MaterialTheme.typography.bodyLarge
+                    textStyle = MaterialTheme.typography.bodyLarge,
+                    shape = RoundedCornerShape(16.dp),
+                    colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f),
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    )
                 )
                 Spacer(modifier = Modifier.width(8.dp))
 
@@ -206,8 +214,13 @@ fun InputScreen(
 
             Button(
                 onClick = onNavigateToDisplay,
-                modifier = Modifier.size(width = 200.dp, height = 56.dp),
-                enabled = text.isNotBlank()
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+                enabled = text.isNotBlank(),
+                shape = RoundedCornerShape(26.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                )
             ) {
                 Text("进入显示", style = MaterialTheme.typography.titleMedium)
             }

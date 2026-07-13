@@ -2,11 +2,11 @@ package com.xiao.wordshow.ui.display
 
 import android.content.pm.ActivityInfo
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.background
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoFixHigh
@@ -172,15 +173,18 @@ fun DisplayScreen(
                         maxSpeed = adaptive.maxScrollSpeed
                     )
                 }
-                // 控制按钮栏
+                // 液态玻璃控制栏
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .then(
-                            if (isFullscreen) Modifier.background(Color.Black.copy(alpha = 0.5f))
-                            else Modifier.background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f))
+                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                        .background(
+                            if (isFullscreen) Color.Black.copy(alpha = 0.45f)
+                            else Color.White.copy(alpha = 0.72f),
+                            RoundedCornerShape(20.dp)
                         )
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                        .border(0.5.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(20.dp))
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -239,14 +243,16 @@ private fun FontSizeSlider(
     range: ClosedFloatingPointRange<Float>
 ) {
     val textColor = if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
-    val bgColor = if (isFullscreen) Color.Black.copy(alpha = 0.4f)
-                  else MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+    val glassBg = if (isFullscreen) Color.Black.copy(alpha = 0.35f)
+                  else Color.White.copy(alpha = 0.65f)
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(bgColor)
-            .padding(horizontal = 12.dp, vertical = 4.dp),
+            .padding(horizontal = 12.dp)
+            .background(glassBg, RoundedCornerShape(14.dp))
+            .border(0.5.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(14.dp))
+            .padding(horizontal = 8.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -300,14 +306,16 @@ private fun SpeedSlider(
     maxSpeed: Float
 ) {
     val textColor = if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
-    val bgColor = if (isFullscreen) Color.Black.copy(alpha = 0.4f)
-                  else MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+    val glassBg = if (isFullscreen) Color.Black.copy(alpha = 0.35f)
+                  else Color.White.copy(alpha = 0.65f)
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(bgColor)
-            .padding(horizontal = 12.dp, vertical = 2.dp),
+            .padding(horizontal = 12.dp)
+            .background(glassBg, RoundedCornerShape(14.dp))
+            .border(0.5.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(14.dp))
+            .padding(horizontal = 8.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(

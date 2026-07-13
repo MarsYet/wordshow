@@ -1,6 +1,8 @@
 package com.xiao.wordshow.ui.navigation
 
 import androidx.activity.ComponentActivity
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -22,14 +24,22 @@ fun AppNavHost() {
     val adaptive = rememberAdaptiveParams()
 
     NavHost(navController = navController, startDestination = Routes.INPUT) {
-        composable(Routes.INPUT) {
+        composable(
+            route = Routes.INPUT,
+            exitTransition = { slideOutHorizontally { -it / 3 } },
+            popEnterTransition = { slideInHorizontally { -it / 3 } }
+        ) {
             InputScreen(
                 onNavigateToDisplay = { navController.navigate(Routes.DISPLAY) },
                 inputViewModel = inputViewModel,
                 adaptive = adaptive
             )
         }
-        composable(Routes.DISPLAY) {
+        composable(
+            route = Routes.DISPLAY,
+            enterTransition = { slideInHorizontally { it } },
+            popExitTransition = { slideOutHorizontally { it } }
+        ) {
             DisplayScreen(
                 onNavigateBack = { navController.popBackStack() },
                 inputViewModel = inputViewModel,
