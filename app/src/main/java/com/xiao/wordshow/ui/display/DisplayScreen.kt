@@ -86,7 +86,8 @@ fun DisplayScreen(
         }
     }
 
-    val isPhone = adaptive.maxFontSize <= 300f
+    // 缓存首次判断，避免横屏后宽度变化导致 isPhone 翻转
+    val isPhone = remember { adaptive.maxFontSize <= 300f }
 
     DisposableEffect(isFullscreen) {
         if (isFullscreen) {
