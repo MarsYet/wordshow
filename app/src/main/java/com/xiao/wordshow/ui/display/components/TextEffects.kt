@@ -48,9 +48,12 @@ fun EffectText(
     modifier: Modifier = Modifier,
     onTextLayout: ((androidx.compose.ui.text.TextLayoutResult) -> Unit)? = null
 ) {
+    // 行距跟随字号等比缩放，防止多行堆叠
+    val lineHeightScale = 1.5f
     val baseStyle = TextStyle(
         fontSize = fontSize,
-        fontWeight = FontWeight.Bold
+        fontWeight = FontWeight.Bold,
+        lineHeight = (fontSize.value * lineHeightScale).sp
     )
 
     when (effectType) {
@@ -59,6 +62,7 @@ fun EffectText(
                 text = text,
                 fontSize = fontSize,
                 fontWeight = FontWeight.Bold,
+                lineHeight = (fontSize.value * 1.5f).sp,
                 maxLines = maxLines,
                 softWrap = softWrap,
                 textAlign = textAlign,
@@ -184,12 +188,12 @@ fun TextEffects(
             text = text,
             effectType = effectType,
             fontSize = effectiveSp.sp,
-            maxLines = 20,
+            maxLines = 30,
             softWrap = true,
             textAlign = TextAlign.Center,
             onTextLayout = { result ->
-                if (!settled && result.hasVisualOverflow && effectiveSp > 16f) {
-                    effectiveSp = (effectiveSp * 0.88f).coerceAtLeast(16f)
+                if (!settled && result.hasVisualOverflow && effectiveSp > 10f) {
+                    effectiveSp = (effectiveSp * 0.82f).coerceAtLeast(10f)
                 } else {
                     settled = true
                 }
