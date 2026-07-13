@@ -180,7 +180,16 @@ fun InputScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("输入文字", style = MaterialTheme.typography.headlineMedium, color = Color.White)
+            Box {
+                Text("输入文字",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(width = 3f)
+                    ),
+                    color = Color.White)
+                Text("输入文字",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onBackground)
+            }
             Spacer(modifier = Modifier.height(24.dp))
 
             Row(
