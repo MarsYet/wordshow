@@ -24,22 +24,22 @@ fun rememberAdaptiveParams(): AdaptiveParams {
         screenWidthDp >= 840 -> {
             // 平板横屏
             AdaptiveParams(
-                defaultFontSize = 120f,
-                maxFontSize = 500f,
-                minFontSize = 20f,
-                defaultScrollSpeed = 1.5f,
-                maxScrollSpeed = 15f,
-                voiceBarCount = 11,
+                defaultFontSize = 180f,
+                maxFontSize = 700f,
+                minFontSize = 24f,
+                defaultScrollSpeed = 2f,
+                maxScrollSpeed = 20f,
+                voiceBarCount = 13,
             )
         }
         screenWidthDp >= 600 -> {
             // 小平板 / 手机横屏
             AdaptiveParams(
-                defaultFontSize = 90f,
-                maxFontSize = 400f,
+                defaultFontSize = 120f,
+                maxFontSize = 500f,
                 minFontSize = 20f,
-                defaultScrollSpeed = 1.2f,
-                maxScrollSpeed = 12f,
+                defaultScrollSpeed = 1.5f,
+                maxScrollSpeed = 15f,
                 voiceBarCount = 9,
             )
         }
