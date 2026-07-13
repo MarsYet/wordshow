@@ -41,12 +41,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,8 +70,6 @@ fun DisplayScreen(
     val scrollSpeed by displayViewModel.scrollSpeed.collectAsState()
 
     val activity = LocalContext.current as ComponentActivity
-    val density = LocalDensity.current
-
     // 全屏时控制栏显隐
     var showControls by remember { mutableStateOf(true) }
     var controlsVisible = !isFullscreen || showControls
@@ -92,16 +88,18 @@ fun DisplayScreen(
         onDispose { FullscreenUtil.exitFullscreen(activity) }
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
-        // 270sp以下保持正中，270以上线性上偏，350sp≈偏上64%，≥360sp=偏上72%
-        val bias = -((fontSize - 270f) * 0.008f).coerceIn(0f, 0.72f)
-        val contentAlign = remember(bias) {
-            BiasAlignment(0f, bias)
-        }
-
+    Column(modifier = modifier.fillMaxSize()) {
+        // 文字显示区 — 占据控制栏上方全部空间，始终在可用区域正中
         Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = contentAlign
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .then(
+                    if (isFullscreen && !showControls) {
+                        Modifier.pointerInput(Unit) { detectTapGestures { showControls = true } }
+                    } else Modifier
+                ),
+            contentAlignment = Alignment.Center
         ) {
             if (text.isBlank()) {
                 Text(
@@ -122,21 +120,9 @@ fun DisplayScreen(
             }
         }
 
-        // 触碰检测：全屏时点击显示控制栏
-        if (isFullscreen && !showControls) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pointerInput(Unit) {
-                        detectTapGestures { showControls = true }
-                    }
-            )
-        }
-
         // 底部控制区（全屏时淡入淡出）
         AnimatedVisibility(
             visible = controlsVisible,
-            modifier = Modifier.align(Alignment.BottomCenter),
             enter = fadeIn(),
             exit = fadeOut()
         ) {
