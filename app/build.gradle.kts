@@ -41,6 +41,9 @@ android {
 }
 
 dependencies {
+    // 讯飞 SparkChain SDK
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar"))))
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

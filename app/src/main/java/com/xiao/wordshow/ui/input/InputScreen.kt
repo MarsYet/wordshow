@@ -75,34 +75,16 @@ fun InputScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    // null=空闲, false=录音中, true=识别中
-    var recordingState by remember { mutableStateOf<Boolean?>(null) }
-    val isRecording = recordingState == false
+    var isRecording by remember { mutableStateOf(false) }
     var currentAmplitude by remember { mutableFloatStateOf(0f) }
     var audioRecord by remember { mutableStateOf<AudioRecord?>(null) }
+    var voiceRecognizer by remember { mutableStateOf<VoiceRecognizer?>(null) }
+    // 语音开始前的原始文字，用于部分结果替换
+    var baseText by remember { mutableStateOf("") }
 
     DisposableEffect(Unit) {
         onDispose {
-            audioRecord?.let {
-                try { it.stop() } catch (_: Exception) {}
-                try { it.release() } catch (_: Exception) {}
-            }
-        }
-    }
-
-    val voiceLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        recordingState = null
-        currentAmplitude = 0f
-        val matches = result.data?.getStringArrayListExtra(
-            android.speech.RecognizerIntent.EXTRA_RESULTS
-        )
-        val spokenText = matches?.firstOrNull()
-        if (!spokenText.isNullOrBlank()) {
-            val cur = inputViewModel.text.value
-            val sep = if (cur.isNotBlank() && !cur.endsWith(" ")) " " else ""
-            inputViewModel.updateText(cur + sep + spokenText)
+            audioRecord?.let { try { it.release() } catch (_: Exception) {} }
         }
     }
 
@@ -124,34 +106,68 @@ fun InputScreen(
             return
         }
 
-        recordingState = false
+        baseText = inputViewModel.text.value
+        isRecording = true
+
+        // 创建讯飞 ASR
+        val recognizer = VoiceRecognizer.create(
+            onResult = { resultText, isFinal ->
+                if (isFinal) {
+                    // 最终结果：追加到原始文字后面
+                    val sep = if (baseText.isNotBlank() && !baseText.endsWith(" ")) " " else ""
+                    inputViewModel.updateText(baseText + sep + resultText)
+                } else {
+                    // 部分结果：实时预览
+                    val sep = if (baseText.isNotBlank() && !baseText.endsWith(" ")) " " else ""
+                    inputViewModel.updateText(baseText + sep + resultText)
+                }
+            },
+            onError = { code, msg ->
+                isRecording = false
+                currentAmplitude = 0f
+                Toast.makeText(context, "识别失败($code): $msg", Toast.LENGTH_SHORT).show()
+            }
+        )
+
+        if (!recognizer.start()) {
+            isRecording = false
+            Toast.makeText(context, "语音识别启动失败", Toast.LENGTH_SHORT).show()
+            return
+        }
+        voiceRecognizer = recognizer
+
+        // 启动 AudioRecord
         val rec = buildAudioRecorder(
             scope = scope,
             onAmplitude = { amp -> currentAmplitude = amp },
+            onAudioData = { bytes ->
+                voiceRecognizer?.write(bytes)
+            },
             onError = {
-                recordingState = null
+                isRecording = false
+                currentAmplitude = 0f
                 Toast.makeText(context, "麦克风不可用", Toast.LENGTH_SHORT).show()
             }
         )
         audioRecord = rec
-        if (rec == null) recordingState = null
+        if (rec == null) {
+            isRecording = false
+            voiceRecognizer?.stop()
+            voiceRecognizer = null
+        }
     }
 
-    fun stopAndRecognize() {
+    fun stopRecording() {
         audioRecord?.let {
             try { it.stop() } catch (_: Exception) {}
             try { it.release() } catch (_: Exception) {}
         }
         audioRecord = null
-        recordingState = true
+        isRecording = false
         currentAmplitude = 0f
 
-        try {
-            voiceLauncher.launch(VoiceRecognizer.createRecognizerIntent())
-        } catch (e: android.content.ActivityNotFoundException) {
-            recordingState = null
-            Toast.makeText(context, "未找到语音识别服务", Toast.LENGTH_LONG).show()
-        }
+        voiceRecognizer?.stop()
+        voiceRecognizer = null
     }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -179,9 +195,8 @@ fun InputScreen(
 
                 MicButton(
                     isRecording = isRecording,
-                    isRecognizing = recordingState == true,
                     onPress = { startRecording() },
-                    onRelease = { stopAndRecognize() },
+                    onRelease = { stopRecording() },
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
@@ -197,7 +212,7 @@ fun InputScreen(
             }
         }
 
-        // 声纹 — 只在按住录音期间显示，松手即刻消失
+        // 声纹
         if (isRecording) {
             VoiceWaveBars(
                 amplitude = currentAmplitude,
@@ -214,7 +229,6 @@ fun InputScreen(
 @Composable
 private fun MicButton(
     isRecording: Boolean,
-    isRecognizing: Boolean,
     onPress: () -> Unit,
     onRelease: () -> Unit,
     modifier: Modifier = Modifier
@@ -222,55 +236,38 @@ private fun MicButton(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    // 按下 → 录音
     LaunchedEffect(isPressed) {
-        if (isPressed && !isRecording && !isRecognizing) {
-            onPress()
-        }
+        if (isPressed && !isRecording) onPress()
     }
-
-    // 松手 → 识别（在录音中松手）
     LaunchedEffect(isPressed, isRecording) {
-        if (!isPressed && isRecording) {
-            onRelease()
-        }
+        if (!isPressed && isRecording) onRelease()
     }
 
-    val active = isRecording || isRecognizing
-
-    val pulseAlpha by if (active) {
+    val pulseAlpha by if (isRecording) {
         rememberInfiniteTransition(label = "mic").animateFloat(
-            initialValue = 1f, targetValue = 0.3f,
-            animationSpec = infiniteRepeatable(tween(600), RepeatMode.Reverse),
-            label = "a"
+            1f, 0.3f, infiniteRepeatable(tween(600), RepeatMode.Reverse), label = "a"
         )
     } else remember { mutableStateOf(1f) }
 
     val bg = when {
-        isRecording   -> MaterialTheme.colorScheme.errorContainer
-        isRecognizing -> MaterialTheme.colorScheme.tertiaryContainer
-        isPressed     -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
-        else          -> MaterialTheme.colorScheme.primaryContainer
+        isRecording -> MaterialTheme.colorScheme.errorContainer
+        isPressed   -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
+        else        -> MaterialTheme.colorScheme.primaryContainer
     }
     val fg = when {
-        isRecording   -> MaterialTheme.colorScheme.onErrorContainer
-        isRecognizing -> MaterialTheme.colorScheme.onTertiaryContainer
-        else          -> MaterialTheme.colorScheme.onPrimaryContainer
+        isRecording -> MaterialTheme.colorScheme.onErrorContainer
+        else        -> MaterialTheme.colorScheme.onPrimaryContainer
     }
 
     Box(
         modifier = modifier
-            .size(56.dp)
-            .clip(CircleShape)
-            .background(bg)
-            .clickable(interactionSource = interactionSource, indication = null, onClick = {}),
+            .size(56.dp).clip(CircleShape).background(bg)
+            .clickable(interactionSource, indication = null, onClick = {}),
         contentAlignment = Alignment.Center
     ) {
         Icon(
-            imageVector = Icons.Filled.KeyboardVoice,
-            contentDescription = "按住说话",
-            modifier = Modifier.size(28.dp).alpha(pulseAlpha),
-            tint = fg
+            Icons.Filled.KeyboardVoice, "按住说话",
+            Modifier.size(28.dp).alpha(pulseAlpha), tint = fg
         )
     }
 }
@@ -278,19 +275,11 @@ private fun MicButton(
 // ---------- 声纹 ----------
 
 @Composable
-private fun VoiceWaveBars(
-    amplitude: Float,
-    modifier: Modifier = Modifier,
-    barCount: Int = 7
-) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.Bottom
-    ) {
+private fun VoiceWaveBars(amplitude: Float, modifier: Modifier = Modifier, barCount: Int = 7) {
+    Row(modifier, Arrangement.Center, Alignment.Bottom) {
         for (i in 0 until barCount) {
-            VoiceBar(idx = i, amp = amplitude)
-            if (i < barCount - 1) Spacer(modifier = Modifier.width(8.dp))
+            VoiceBar(i, amplitude)
+            if (i < barCount - 1) Spacer(Modifier.width(8.dp))
         }
     }
 }
@@ -298,25 +287,18 @@ private fun VoiceWaveBars(
 @Composable
 private fun VoiceBar(idx: Int, amp: Float) {
     val t = rememberInfiniteTransition(label = "vb$idx")
-    val j by t.animateFloat(
-        0f, 1f,
+    val j by t.animateFloat(0f, 1f,
         infiniteRepeatable(tween(300 + idx * 70, easing = LinearEasing), RepeatMode.Reverse),
         label = "j$idx"
     )
     val base = 0.06f + j * 0.04f
     val voice = amp.coerceIn(0f, 1f) * 0.85f
     val h = (base + voice).coerceIn(0f, 1f)
-
     val color = if (amp > 0.12f) MaterialTheme.colorScheme.primary
                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
 
-    Box(
-        Modifier
-            .width(5.dp)
-            .height((8 + (56 - 8) * h).dp)
-            .clip(RoundedCornerShape(3.dp))
-            .background(color)
-    )
+    Box(Modifier.width(5.dp).height((8 + (56 - 8) * h).dp)
+        .clip(RoundedCornerShape(3.dp)).background(color))
 }
 
 // ---------- AudioRecord ----------
@@ -324,12 +306,13 @@ private fun VoiceBar(idx: Int, amp: Float) {
 private fun buildAudioRecorder(
     scope: kotlinx.coroutines.CoroutineScope,
     onAmplitude: (Float) -> Unit,
+    onAudioData: (ByteArray) -> Unit,
     onError: () -> Unit
 ): AudioRecord? {
     return try {
         val bufSize = AudioRecord.getMinBufferSize(
             SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
-        ).coerceAtLeast(1024)
+        ).coerceAtLeast(1280) // 40ms frame
 
         val rec = AudioRecord(
             MediaRecorder.AudioSource.MIC,
@@ -337,10 +320,7 @@ private fun buildAudioRecorder(
             AudioFormat.ENCODING_PCM_16BIT, bufSize
         )
 
-        if (rec.state != AudioRecord.STATE_INITIALIZED) {
-            rec.release(); onError(); return null
-        }
-
+        if (rec.state != AudioRecord.STATE_INITIALIZED) { rec.release(); onError(); return null }
         rec.startRecording()
 
         scope.launch(Dispatchers.IO) {
@@ -349,17 +329,31 @@ private fun buildAudioRecorder(
                 while (isActive && rec.recordingState == AudioRecord.RECORDSTATE_RECORDING) {
                     val n = rec.read(buf, 0, buf.size)
                     if (n > 0) {
+                        // 振幅
                         var sum = 0.0
                         for (i in 0 until n) sum += buf[i].toDouble().let { it * it }
                         val rms = sqrt(sum / n)
                         val norm = (log10(rms.coerceAtLeast(1.0)) / log10(32768.0))
                             .coerceIn(0.0, 1.0).toFloat()
                         withContext(Dispatchers.Main) { onAmplitude(norm) }
+
+                        // 转 byte[] 送入 ASR
+                        val bytes = ShortArrayToByteArray(buf, n)
+                        withContext(Dispatchers.Main) { onAudioData(bytes) }
                     }
                 }
             } catch (_: Exception) {}
         }
-
         rec
     } catch (_: Exception) { onError(); null }
+}
+
+private fun ShortArrayToByteArray(shorts: ShortArray, len: Int): ByteArray {
+    val bytes = ByteArray(len * 2)
+    for (i in 0 until len) {
+        val v = shorts[i].toInt()
+        bytes[i * 2] = (v and 0xFF).toByte()
+        bytes[i * 2 + 1] = ((v shr 8) and 0xFF).toByte()
+    }
+    return bytes
 }

@@ -12,3 +12,7 @@
 # Kotlin coroutines
 -keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
 -keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
+
+# 讯飞 SparkChain SDK
+-keep class com.iflytek.sparkchain.** {*;}
+-keep class com.iflytek.sparkchain.**
