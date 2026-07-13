@@ -1,6 +1,7 @@
 package com.xiao.wordshow.ui.input
 
 import android.Manifest
+import android.content.ActivityNotFoundException
 import android.content.pm.PackageManager
 import android.speech.RecognizerIntent
 import android.widget.Toast
@@ -19,7 +20,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardVoice
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -29,12 +29,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -48,18 +44,8 @@ fun InputScreen(
 ) {
     val text by inputViewModel.text.collectAsState()
     val context = LocalContext.current
-    var voiceNotAvailable by remember { mutableStateOf(false) }
 
-    // 录音权限请求
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        if (!granted) {
-            Toast.makeText(context, "语音输入需要录音权限，请在系统设置中开启", Toast.LENGTH_LONG).show()
-        }
-    }
-
-    // 语音识别结果
+    // 语音识别结果处理
     val voiceLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -67,28 +53,41 @@ fun InputScreen(
         val spokenText = matches?.firstOrNull()
         if (!spokenText.isNullOrBlank()) {
             val current = inputViewModel.text.value
-            // 追加到现有文字后面
             val separator = if (current.isNotBlank() && !current.endsWith(" ")) " " else ""
             inputViewModel.updateText(current + separator + spokenText)
         }
     }
 
-    fun startVoiceInput() {
-        // 检查设备是否支持语音识别
-        if (!VoiceRecognizer.isAvailable(context)) {
-            voiceNotAvailable = true
-            Toast.makeText(context, "此设备不支持语音识别", Toast.LENGTH_SHORT).show()
-            return
+    fun tryLaunchVoice() {
+        try {
+            voiceLauncher.launch(VoiceRecognizer.createRecognizerIntent())
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(
+                context,
+                "未找到语音识别服务\n请安装讯飞输入法或 Google 语音搜索",
+                Toast.LENGTH_LONG
+            ).show()
         }
-        voiceNotAvailable = false
+    }
 
-        // 检查权限
+    // 录音权限请求（需要 tryLaunchVoice 已定义）
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            tryLaunchVoice()
+        } else {
+            Toast.makeText(context, "语音输入需要录音权限，请在系统设置中开启", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    fun startVoiceInput() {
         val hasPermission = ContextCompat.checkSelfPermission(
             context, Manifest.permission.RECORD_AUDIO
         ) == PackageManager.PERMISSION_GRANTED
 
         if (hasPermission) {
-            voiceLauncher.launch(VoiceRecognizer.createRecognizerIntent())
+            tryLaunchVoice()
         } else {
             permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
         }
@@ -124,20 +123,15 @@ fun InputScreen(
 
             Spacer(modifier = Modifier.width(8.dp))
 
+            // 语音按钮 — 始终可用，不预检，运行时捕获异常
             IconButton(
                 onClick = { startVoiceInput() },
                 modifier = Modifier
                     .size(56.dp)
                     .padding(top = 4.dp),
                 colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = if (voiceNotAvailable)
-                        MaterialTheme.colorScheme.surfaceVariant
-                    else
-                        MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = if (voiceNotAvailable)
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    else
-                        MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             ) {
                 Icon(
