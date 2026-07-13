@@ -1,7 +1,6 @@
 package com.xiao.wordshow.ui.display
 
 import android.content.pm.ActivityInfo
-import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -21,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoFixHigh
@@ -46,9 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
@@ -348,17 +346,14 @@ private fun SpeedSlider(
 }
 
 /**
- * 液态玻璃 Modifier — blur + 半透明背景 + 细边框
+ * 液态玻璃 Modifier — 高不透明度 + 渐变 + 细边框模拟毛玻璃
  */
 private fun Modifier.glassBg(isFullscreen: Boolean, shape: androidx.compose.ui.graphics.Shape): Modifier {
-    val bgColor = if (isFullscreen) Color.Black.copy(alpha = 0.5f)
-                  else Color.White.copy(alpha = 0.7f)
-    val borderColor = Color.White.copy(alpha = if (isFullscreen) 0.12f else 0.3f)
+    val bgColor = if (isFullscreen) Color.Black.copy(alpha = 0.55f)
+                  else Color.White.copy(alpha = 0.82f)
+    val borderColor = Color.White.copy(alpha = if (isFullscreen) 0.1f else 0.25f)
 
     return this
-        .then(
-            if (Build.VERSION.SDK_INT >= 31) Modifier.blur(12.dp) else Modifier
-        )
         .background(bgColor, shape)
         .border(0.5.dp, borderColor, shape)
 }
