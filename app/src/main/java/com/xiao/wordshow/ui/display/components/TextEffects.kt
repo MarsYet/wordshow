@@ -159,6 +159,28 @@ fun EffectText(
                 style = baseStyle.copy(color = Color.hsl(hue, 1f, 0.5f))
             )
         }
+        TextEffect.LED -> {
+            val flicker = rememberInfiniteTransition(label = "led")
+            val glow by flicker.animateFloat(0.7f, 1f,
+                infiniteRepeatable(tween(80, easing = LinearEasing), RepeatMode.Reverse), "lg")
+            Text(
+                text = text,
+                maxLines = maxLines,
+                softWrap = softWrap,
+                textAlign = textAlign,
+                modifier = modifier,
+                onTextLayout = onTextLayout,
+                style = baseStyle.copy(
+                    color = Color(0xFFFF6B00),
+                    shadow = Shadow(
+                        color = Color(0xFFFF4400).copy(alpha = glow),
+                        offset = Offset.Zero,
+                        blurRadius = 12f
+                    ),
+                    letterSpacing = (fontSize.value * 0.15f).sp
+                )
+            )
+        }
     }
 }
 

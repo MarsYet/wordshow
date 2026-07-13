@@ -51,4 +51,16 @@ class DisplayViewModel : ViewModel() {
         val nextIndex = (effects.indexOf(_currentEffect.value) + 1) % effects.size
         _currentEffect.value = effects[nextIndex]
     }
+
+    // 浅色背景
+    private val _isLightBg = MutableStateFlow(false)
+    val isLightBg: StateFlow<Boolean> = _isLightBg.asStateFlow()
+
+    fun toggleLightBg() {
+        _isLightBg.value = !_isLightBg.value
+    }
+
+    fun setLightBg(light: Boolean) {
+        _isLightBg.value = light
+    }
 }

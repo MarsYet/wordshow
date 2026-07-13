@@ -32,6 +32,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.FullscreenExit
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.TextDecrease
@@ -49,6 +50,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,6 +66,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import com.xiao.wordshow.data.model.TextEffect
 import com.xiao.wordshow.ui.display.components.ScrollingText
 import com.xiao.wordshow.ui.display.components.TextEffects
@@ -77,7 +80,8 @@ fun DisplayScreen(
     modifier: Modifier = Modifier,
     inputViewModel: InputViewModel,
     displayViewModel: DisplayViewModel,
-    adaptive: AdaptiveParams
+    adaptive: AdaptiveParams,
+    repo: com.xiao.wordshow.data.preferences.HistoryRepository
 ) {
     val text by inputViewModel.text.collectAsState()
     val isScrolling by displayViewModel.isScrolling.collectAsState()
@@ -85,6 +89,12 @@ fun DisplayScreen(
     val fontSize by displayViewModel.fontSize.collectAsState()
     val currentEffect by displayViewModel.currentEffect.collectAsState()
     val scrollSpeed by displayViewModel.scrollSpeed.collectAsState()
+    val isLightBg by displayViewModel.isLightBg.collectAsState()
+
+    // 加载持久化背景设置
+    LaunchedEffect(Unit) {
+        repo.isLightBackground.collect { displayViewModel.setLightBg(it) }
+    }
 
     val activity = LocalContext.current as ComponentActivity
     // 全屏时控制栏显隐
@@ -100,6 +110,10 @@ fun DisplayScreen(
     }
 
     val isPhone = remember { adaptive.maxFontSize <= 300f }
+    val scope = rememberCoroutineScope()
+    val contentColor = if (isLightBg) Color.Black else Color.White
+    val controlBg = if (isLightBg) Brush.verticalGradient(listOf(Color.White, Color(0xFFEEEEEE), Color(0xFFE0E0E0)))
+                   else Brush.verticalGradient(listOf(Color(0xFF3A3A3A), Color(0xFF2A2A2A), Color(0xFF222222)))
 
     fun doToggleFullscreen() {
         val willBeFullscreen = !isFullscreen
@@ -127,8 +141,12 @@ fun DisplayScreen(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        // 动态背景（必须给 fillMaxSize 否则 Canvas 尺寸为 0）
-        AnimatedBackground(Modifier.fillMaxSize())
+        // 动态背景
+        if (isLightBg) {
+            Box(Modifier.fillMaxSize().background(Color(0xFFF2F2F2)))
+        } else {
+            AnimatedBackground(Modifier.fillMaxSize())
+        }
 
         Column(modifier = Modifier.fillMaxSize()) {
         // 文字显示区 — 控制栏上方空间内居中，支持双指缩放字号
@@ -231,6 +249,16 @@ fun DisplayScreen(
                             else if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
                         )
                     }
+                    // 浅色/深色背景切换
+                    IconButton(onClick = {
+                        val newLight = !isLightBg
+                        displayViewModel.toggleLightBg()
+                        scope.launch { repo.setLightBackground(newLight) }
+                    }) {
+                        Icon(Icons.Filled.LightMode, "切换背景",
+                            tint = if (isLightBg) Color(0xFFFFD93D) else Color.White)
+                    }
+                    // 全屏
                     IconButton(onClick = {
                         showControls = true
                         doToggleFullscreen()

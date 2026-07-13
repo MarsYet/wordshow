@@ -12,5 +12,5 @@ data class DisplaySettings(
 )
 
 enum class TextEffect {
-    NONE, GRADIENT, SHADOW, GLOW, BOUNCE
+    NONE, GRADIENT, SHADOW, GLOW, BOUNCE, LED
 }

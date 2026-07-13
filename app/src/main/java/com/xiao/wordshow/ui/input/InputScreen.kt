@@ -21,6 +21,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,18 +30,26 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.KeyboardVoice
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -55,10 +64,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.xiao.wordshow.data.preferences.HistoryRepository
 import com.xiao.wordshow.data.voice.VoiceRecognizer
+import com.xiao.wordshow.util.AdaptiveParams
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -68,110 +81,69 @@ import kotlin.math.sqrt
 
 private const val SAMPLE_RATE = 16000
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InputScreen(
     onNavigateToDisplay: () -> Unit,
     modifier: Modifier = Modifier,
     inputViewModel: InputViewModel,
-    adaptive: com.xiao.wordshow.util.AdaptiveParams
+    adaptive: AdaptiveParams,
+    repo: HistoryRepository
 ) {
     val text by inputViewModel.text.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-
     var isRecording by remember { mutableStateOf(false) }
     var currentAmplitude by remember { mutableFloatStateOf(0f) }
     var audioRecord by remember { mutableStateOf<AudioRecord?>(null) }
     var voiceRecognizer by remember { mutableStateOf<VoiceRecognizer?>(null) }
-    // 语音开始前的原始文字，用于部分结果替换
     var baseText by remember { mutableStateOf("") }
 
+    // DataStore 数据
+    val history by repo.history.collectAsState(initial = emptyList())
+    val presets by repo.presets.collectAsState(initial = HistoryRepository.DEFAULT_PRESETS.toList())
+
+    // 历史弹窗
+    var showHistory by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
     DisposableEffect(Unit) {
-        onDispose {
-            audioRecord?.let { try { it.release() } catch (_: Exception) {} }
-        }
+        onDispose { audioRecord?.let { try { it.release() } catch (_: Exception) {} } }
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
-        if (!granted) {
-            Toast.makeText(context, "语音输入需要录音权限，请在系统设置中开启", Toast.LENGTH_LONG).show()
-        }
+        if (!granted) Toast.makeText(context, "语音输入需要录音权限，请在系统设置中开启", Toast.LENGTH_LONG).show()
     }
 
-    fun startRecording() {
-        val hasPermission = ContextCompat.checkSelfPermission(
-            context, Manifest.permission.RECORD_AUDIO
-        ) == PackageManager.PERMISSION_GRANTED
-
-        if (!hasPermission) {
-            permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-            return
-        }
-
-        baseText = inputViewModel.text.value
-        isRecording = true
-
-        // 创建讯飞 ASR
-        val recognizer = VoiceRecognizer.create(
-            onResult = { resultText, isFinal ->
-                if (isFinal) {
-                    // 最终结果：追加到原始文字后面
-                    val sep = if (baseText.isNotBlank() && !baseText.endsWith(" ")) " " else ""
-                    inputViewModel.updateText(baseText + sep + resultText)
-                } else {
-                    // 部分结果：实时预览
-                    val sep = if (baseText.isNotBlank() && !baseText.endsWith(" ")) " " else ""
-                    inputViewModel.updateText(baseText + sep + resultText)
-                }
+    fun startRecording() { /* ... same as before ... */
+        val hasPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+        if (!hasPermission) { permissionLauncher.launch(Manifest.permission.RECORD_AUDIO); return }
+        baseText = inputViewModel.text.value; isRecording = true
+        val r = VoiceRecognizer.create(
+            onResult = { rt, fin ->
+                val sep = if (baseText.isNotBlank() && !baseText.endsWith(" ")) " " else ""
+                inputViewModel.updateText(baseText + sep + rt)
             },
-            onError = { code, msg ->
-                isRecording = false
-                currentAmplitude = 0f
-                Toast.makeText(context, "识别失败($code): $msg", Toast.LENGTH_SHORT).show()
-            }
+            onError = { c, m -> isRecording = false; currentAmplitude = 0f; Toast.makeText(context, "识别失败($c): $m", Toast.LENGTH_SHORT).show() }
         )
-
-        if (!recognizer.start()) {
-            isRecording = false
-            Toast.makeText(context, "语音识别启动失败", Toast.LENGTH_SHORT).show()
-            return
-        }
-        voiceRecognizer = recognizer
-
-        // 启动 AudioRecord
-        val rec = buildAudioRecorder(
-            scope = scope,
-            onAmplitude = { amp -> currentAmplitude = amp },
-            onAudioData = { bytes ->
-                voiceRecognizer?.write(bytes)
-            },
-            onError = {
-                isRecording = false
-                currentAmplitude = 0f
-                Toast.makeText(context, "麦克风不可用", Toast.LENGTH_SHORT).show()
-            }
-        )
+        if (!r.start()) { isRecording = false; Toast.makeText(context, "语音识别启动失败", Toast.LENGTH_SHORT).show(); return }
+        voiceRecognizer = r
+        val rec = buildAudioRecorder(scope, { currentAmplitude = it }, { voiceRecognizer?.write(it) }, { isRecording = false; currentAmplitude = 0f; Toast.makeText(context, "麦克风不可用", Toast.LENGTH_SHORT).show() })
         audioRecord = rec
-        if (rec == null) {
-            isRecording = false
-            voiceRecognizer?.stop()
-            voiceRecognizer = null
-        }
+        if (rec == null) { isRecording = false; voiceRecognizer?.stop(); voiceRecognizer = null }
     }
 
     fun stopRecording() {
-        audioRecord?.let {
-            try { it.stop() } catch (_: Exception) {}
-            try { it.release() } catch (_: Exception) {}
-        }
-        audioRecord = null
-        isRecording = false
-        currentAmplitude = 0f
+        audioRecord?.let { try { it.stop() } catch (_: Exception) {}; try { it.release() } catch (_: Exception) {} }
+        audioRecord = null; isRecording = false; currentAmplitude = 0f
+        voiceRecognizer?.stop(); voiceRecognizer = null
+    }
 
-        voiceRecognizer?.stop()
-        voiceRecognizer = null
+    fun navigate() {
+        scope.launch { repo.addHistory(text) }
+        onNavigateToDisplay()
     }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -180,31 +152,44 @@ fun InputScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Box {
-                Text("输入文字",
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(width = 3f)
-                    ),
-                    color = Color.White)
-                Text("输入文字",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.onBackground)
+            // 标题行
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Box {
+                    Text("输入文字", style = MaterialTheme.typography.headlineMedium.copy(drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(3f)), color = Color.White)
+                    Text("输入文字", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
+                }
+                Spacer(Modifier.weight(1f))
+                IconButton(onClick = { showHistory = true }) {
+                    Icon(Icons.AutoMirrored.Filled.List, "历史记录", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
-            Spacer(modifier = Modifier.height(24.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.Top
+            Spacer(Modifier.height(8.dp))
+
+            // 预设短语条
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(vertical = 4.dp)
             ) {
+                items(presets, key = { it }) { p ->
+                    SuggestionChip(
+                        onClick = { inputViewModel.updateText(p) },
+                        label = { Text(p, style = MaterialTheme.typography.labelMedium) },
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            // 输入区
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
                 OutlinedTextField(
-                    value = text,
-                    onValueChange = inputViewModel::updateText,
+                    value = text, onValueChange = inputViewModel::updateText,
                     modifier = Modifier.weight(1f),
                     label = { Text("输入文字...", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                     maxLines = 5,
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(
-                        color = MaterialTheme.colorScheme.onSurface
-                    ),
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
                     shape = RoundedCornerShape(16.dp),
                     colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
                         focusedTextColor = MaterialTheme.colorScheme.onSurface,
@@ -218,163 +203,102 @@ fun InputScreen(
                         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                     )
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-
-                MicButton(
-                    isRecording = isRecording,
-                    onPress = { startRecording() },
-                    onRelease = { stopRecording() },
-                    modifier = Modifier.padding(top = 4.dp)
-                )
+                Spacer(Modifier.width(8.dp))
+                MicButton(isRecording, { startRecording() }, { stopRecording() }, Modifier.padding(top = 4.dp))
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(Modifier.height(24.dp))
 
             Button(
-                onClick = onNavigateToDisplay,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-                    .shadow(6.dp, RoundedCornerShape(26.dp), spotColor = Color.Black.copy(alpha = 0.3f)),
+                onClick = { navigate() },
+                modifier = Modifier.fillMaxWidth().height(52.dp).shadow(6.dp, RoundedCornerShape(26.dp), spotColor = Color.Black.copy(alpha = 0.3f)),
                 enabled = text.isNotBlank(),
                 shape = RoundedCornerShape(26.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF3A3A3A),
-                    contentColor = Color.White,
-                    disabledContainerColor = Color(0xFF222222),
-                    disabledContentColor = Color(0xFF666666),
+                    containerColor = Color(0xFF3A3A3A), contentColor = Color.White,
+                    disabledContainerColor = Color(0xFF222222), disabledContentColor = Color(0xFF666666),
                 )
-            ) {
-                Text("进入显示", style = MaterialTheme.typography.titleMedium)
-            }
+            ) { Text("进入显示", style = MaterialTheme.typography.titleMedium) }
         }
 
         // 声纹
-        if (isRecording) {
-            VoiceWaveBars(
-                amplitude = currentAmplitude,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 32.dp)
-            )
+        if (isRecording) VoiceWaveBars(currentAmplitude, Modifier.align(Alignment.BottomCenter).padding(bottom = 32.dp))
+    }
+
+    // 历史记录弹窗
+    if (showHistory) {
+        ModalBottomSheet(onDismissRequest = { showHistory = false }, sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+        ) {
+            Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 32.dp)) {
+                Text("历史记录", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(bottom = 16.dp))
+                if (history.isEmpty()) {
+                    Text("暂无历史记录", color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = 32.dp))
+                } else {
+                    history.take(20).forEach { item ->
+                        Row(Modifier.fillMaxWidth().clickable {
+                            inputViewModel.updateText(item)
+                            showHistory = false
+                        }.padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Text(item, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f), maxLines = 2)
+                            IconButton(onClick = { scope.launch { repo.removeHistory(item) } }, modifier = Modifier.size(32.dp)) {
+                                Icon(Icons.Filled.Delete, "删除", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
-// ---------- 麦克风按钮 ----------
-
+// ---- MicButton ----
 @Composable
-private fun MicButton(
-    isRecording: Boolean,
-    onPress: () -> Unit,
-    onRelease: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+private fun MicButton(isRecording: Boolean, onPress: () -> Unit, onRelease: () -> Unit, modifier: Modifier = Modifier) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-
-    LaunchedEffect(isPressed) {
-        if (isPressed && !isRecording) onPress()
-    }
-    LaunchedEffect(isPressed, isRecording) {
-        if (!isPressed && isRecording) onRelease()
-    }
-
-    val pulseAlpha by if (isRecording) {
-        rememberInfiniteTransition(label = "mic").animateFloat(
-            1f, 0.3f, infiniteRepeatable(tween(600), RepeatMode.Reverse), label = "a"
-        )
-    } else remember { mutableStateOf(1f) }
-
-    val bg = when {
-        isRecording -> MaterialTheme.colorScheme.errorContainer
-        isPressed   -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
-        else        -> MaterialTheme.colorScheme.primaryContainer
-    }
-    val fg = when {
-        isRecording -> MaterialTheme.colorScheme.onErrorContainer
-        else        -> MaterialTheme.colorScheme.onPrimaryContainer
-    }
-
-    Box(
-        modifier = modifier
-            .size(56.dp).clip(CircleShape).background(bg)
-            .clickable(interactionSource, indication = null, onClick = {}),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            Icons.Filled.KeyboardVoice, "按住说话",
-            Modifier.size(28.dp).alpha(pulseAlpha), tint = fg
-        )
+    LaunchedEffect(isPressed) { if (isPressed && !isRecording) onPress() }
+    LaunchedEffect(isPressed, isRecording) { if (!isPressed && isRecording) onRelease() }
+    val pulseAlpha by if (isRecording) rememberInfiniteTransition(label = "mic").animateFloat(1f, 0.3f, infiniteRepeatable(tween(600), RepeatMode.Reverse), label = "a") else remember { mutableStateOf(1f) }
+    val bg = when { isRecording -> MaterialTheme.colorScheme.errorContainer; isPressed -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f); else -> MaterialTheme.colorScheme.primaryContainer }
+    val fg = when { isRecording -> MaterialTheme.colorScheme.onErrorContainer; else -> MaterialTheme.colorScheme.onPrimaryContainer }
+    Box(modifier.size(56.dp).clip(CircleShape).background(bg).clickable(interactionSource, indication = null, onClick = {}), contentAlignment = Alignment.Center) {
+        Icon(Icons.Filled.KeyboardVoice, "按住说话", Modifier.size(28.dp).alpha(pulseAlpha), tint = fg)
     }
 }
 
-// ---------- 声纹 ----------
-
+// ---- 声纹 ----
 @Composable
 private fun VoiceWaveBars(amplitude: Float, modifier: Modifier = Modifier, barCount: Int = 7) {
-    Row(modifier, Arrangement.Center, Alignment.Bottom) {
-        for (i in 0 until barCount) {
-            VoiceBar(i, amplitude)
-            if (i < barCount - 1) Spacer(Modifier.width(8.dp))
-        }
-    }
+    Row(modifier, Arrangement.Center, Alignment.Bottom) { for (i in 0 until barCount) { VoiceBar(i, amplitude); if (i < barCount - 1) Spacer(Modifier.width(8.dp)) } }
 }
 
 @Composable
 private fun VoiceBar(idx: Int, amp: Float) {
     val t = rememberInfiniteTransition(label = "vb$idx")
-    val j by t.animateFloat(0f, 1f,
-        infiniteRepeatable(tween(300 + idx * 70, easing = LinearEasing), RepeatMode.Reverse),
-        label = "j$idx"
-    )
-    val base = 0.06f + j * 0.04f
-    val voice = amp.coerceIn(0f, 1f) * 0.85f
-    val h = (base + voice).coerceIn(0f, 1f)
-    val color = if (amp > 0.12f) MaterialTheme.colorScheme.primary
-               else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
-
-    Box(Modifier.width(5.dp).height((8 + (56 - 8) * h).dp)
-        .clip(RoundedCornerShape(3.dp)).background(color))
+    val j by t.animateFloat(0f, 1f, infiniteRepeatable(tween(300 + idx * 70, easing = LinearEasing), RepeatMode.Reverse), label = "j$idx")
+    val base = 0.06f + j * 0.04f; val voice = amp.coerceIn(0f, 1f) * 0.85f; val h = (base + voice).coerceIn(0f, 1f)
+    val color = if (amp > 0.12f) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+    Box(Modifier.width(5.dp).height((8 + (56 - 8) * h).dp).clip(RoundedCornerShape(3.dp)).background(color))
 }
 
-// ---------- AudioRecord ----------
-
-private fun buildAudioRecorder(
-    scope: kotlinx.coroutines.CoroutineScope,
-    onAmplitude: (Float) -> Unit,
-    onAudioData: (ByteArray) -> Unit,
-    onError: () -> Unit
-): AudioRecord? {
+// ---- AudioRecord ----
+private fun buildAudioRecorder(scope: kotlinx.coroutines.CoroutineScope, onAmplitude: (Float) -> Unit, onAudioData: (ByteArray) -> Unit, onError: () -> Unit): AudioRecord? {
     return try {
-        val bufSize = AudioRecord.getMinBufferSize(
-            SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
-        ).coerceAtLeast(1280) // 40ms frame
-
-        val rec = AudioRecord(
-            MediaRecorder.AudioSource.MIC,
-            SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO,
-            AudioFormat.ENCODING_PCM_16BIT, bufSize
-        )
-
+        val bufSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT).coerceAtLeast(1280)
+        val rec = AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufSize)
         if (rec.state != AudioRecord.STATE_INITIALIZED) { rec.release(); onError(); return null }
         rec.startRecording()
-
         scope.launch(Dispatchers.IO) {
             val buf = ShortArray(bufSize)
             try {
                 while (isActive && rec.recordingState == AudioRecord.RECORDSTATE_RECORDING) {
                     val n = rec.read(buf, 0, buf.size)
                     if (n > 0) {
-                        // 振幅
-                        var sum = 0.0
-                        for (i in 0 until n) sum += buf[i].toDouble().let { it * it }
-                        val rms = sqrt(sum / n)
-                        val norm = (log10(rms.coerceAtLeast(1.0)) / log10(32768.0))
-                            .coerceIn(0.0, 1.0).toFloat()
+                        var sum = 0.0; for (i in 0 until n) sum += buf[i].toDouble().let { it * it }
+                        val rms = sqrt(sum / n); val norm = (log10(rms.coerceAtLeast(1.0)) / log10(32768.0)).coerceIn(0.0, 1.0).toFloat()
                         withContext(Dispatchers.Main) { onAmplitude(norm) }
-
-                        // 转 byte[] 送入 ASR
                         val bytes = ShortArrayToByteArray(buf, n)
                         withContext(Dispatchers.Main) { onAudioData(bytes) }
                     }
@@ -386,11 +310,5 @@ private fun buildAudioRecorder(
 }
 
 private fun ShortArrayToByteArray(shorts: ShortArray, len: Int): ByteArray {
-    val bytes = ByteArray(len * 2)
-    for (i in 0 until len) {
-        val v = shorts[i].toInt()
-        bytes[i * 2] = (v and 0xFF).toByte()
-        bytes[i * 2 + 1] = ((v shr 8) and 0xFF).toByte()
-    }
-    return bytes
+    val bytes = ByteArray(len * 2); for (i in 0 until len) { val v = shorts[i].toInt(); bytes[i * 2] = (v and 0xFF).toByte(); bytes[i * 2 + 1] = ((v shr 8) and 0xFF).toByte() }; return bytes
 }
