@@ -30,8 +30,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardVoice
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -175,6 +173,7 @@ fun InputScreen(
 
 /**
  * 按住说话按钮 — 按下开始录音，松开无操作（系统识别自动结束）
+ * 用 Box + pointerInput 代替 IconButton，避免内置 clickable 拦截手势
  */
 @Composable
 private fun HoldToTalkButton(
@@ -182,10 +181,11 @@ private fun HoldToTalkButton(
     onPress: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val alpha by if (isListening) {
+    // 呼吸动画（聆听中）
+    val pulseAlpha by if (isListening) {
         rememberInfiniteTransition(label = "pulse").animateFloat(
             initialValue = 1f,
-            targetValue = 0.4f,
+            targetValue = 0.3f,
             animationSpec = infiniteRepeatable(
                 animation = tween(600),
                 repeatMode = RepeatMode.Reverse
@@ -193,13 +193,24 @@ private fun HoldToTalkButton(
             label = "micAlpha"
         )
     } else {
-        remember { mutableStateOf(1f) }  // no need for animation
+        remember { mutableStateOf(1f) }
     }
 
-    IconButton(
-        onClick = {}, // 不用 onClick，用 pointerInput 处理按压
+    val containerColor = if (isListening)
+        MaterialTheme.colorScheme.errorContainer
+    else
+        MaterialTheme.colorScheme.primaryContainer
+
+    val iconColor = if (isListening)
+        MaterialTheme.colorScheme.onErrorContainer
+    else
+        MaterialTheme.colorScheme.onPrimaryContainer
+
+    Box(
         modifier = modifier
             .size(56.dp)
+            .clip(CircleShape)
+            .background(containerColor)
             .pointerInput(Unit) {
                 detectTapGestures(
                     onPress = {
@@ -208,23 +219,15 @@ private fun HoldToTalkButton(
                     }
                 )
             },
-        colors = IconButtonDefaults.iconButtonColors(
-            containerColor = if (isListening)
-                MaterialTheme.colorScheme.errorContainer
-            else
-                MaterialTheme.colorScheme.primaryContainer,
-            contentColor = if (isListening)
-                MaterialTheme.colorScheme.onErrorContainer
-            else
-                MaterialTheme.colorScheme.onPrimaryContainer
-        )
+        contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = Icons.Filled.KeyboardVoice,
             contentDescription = "按住说话",
             modifier = Modifier
                 .size(28.dp)
-                .alpha(alpha)
+                .alpha(pulseAlpha),
+            tint = iconColor
         )
     }
 }
