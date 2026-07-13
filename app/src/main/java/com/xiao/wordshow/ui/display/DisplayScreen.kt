@@ -1,5 +1,6 @@
 package com.xiao.wordshow.ui.display
 
+import android.content.pm.ActivityInfo
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.animation.AnimatedVisibility
@@ -85,10 +86,27 @@ fun DisplayScreen(
         }
     }
 
+    val isPhone = adaptive.maxFontSize <= 300f
+
     DisposableEffect(isFullscreen) {
-        if (isFullscreen) FullscreenUtil.enterFullscreen(activity)
-        else { FullscreenUtil.exitFullscreen(activity); showControls = true }
-        onDispose { FullscreenUtil.exitFullscreen(activity) }
+        if (isFullscreen) {
+            FullscreenUtil.enterFullscreen(activity)
+            if (isPhone) {
+                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            }
+        } else {
+            FullscreenUtil.exitFullscreen(activity)
+            if (isPhone) {
+                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            }
+            showControls = true
+        }
+        onDispose {
+            FullscreenUtil.exitFullscreen(activity)
+            if (isPhone) {
+                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            }
+        }
     }
 
     Column(modifier = modifier.fillMaxSize()) {
