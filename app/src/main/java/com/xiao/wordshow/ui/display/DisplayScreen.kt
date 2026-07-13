@@ -41,6 +41,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -92,10 +93,15 @@ fun DisplayScreen(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        // 主显示区域 — 始终在整个屏幕内居中，不加 padding
+        // 主显示区域 — 大字上偏避让底部控制栏，小字保持正中
+        val bias = ((fontSize - 64f) / 336f).coerceIn(-0.35f, 0f) // 64sp→0偏, 400sp→-0.35偏上
+        val contentAlign = remember(bias) {
+            BiasAlignment(0f, bias)
+        }
+
         Box(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+            contentAlignment = contentAlign
         ) {
             if (text.isBlank()) {
                 Text(
