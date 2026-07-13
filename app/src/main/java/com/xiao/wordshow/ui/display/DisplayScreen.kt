@@ -152,7 +152,7 @@ fun DisplayScreen(
                 Text(
                     text = "无显示内容\n请返回输入页输入文字",
                     textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color.White.copy(alpha = 0.5f)
                 )
             } else if (isScrolling) {
                 ScrollingText(
@@ -209,8 +209,7 @@ fun DisplayScreen(
                     Text(
                         if (isScrolling) "滚动中" else "静止",
                         style = MaterialTheme.typography.labelLarge,
-                        color = if (isFullscreen) Color.White.copy(alpha = 0.8f)
-                               else MaterialTheme.colorScheme.onSurfaceVariant
+                        color = Color.White.copy(alpha = 0.85f)
                     )
                     IconButton(onClick = { displayViewModel.toggleScrolling() }) {
                         Icon(
@@ -253,7 +252,7 @@ private fun FontSizeSlider(
     isFullscreen: Boolean,
     range: ClosedFloatingPointRange<Float>
 ) {
-    val textColor = if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
+    val textColor = Color.White
 
     Row(
         modifier = Modifier
@@ -313,7 +312,7 @@ private fun SpeedSlider(
     isFullscreen: Boolean,
     maxSpeed: Float
 ) {
-    val textColor = if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
+    val textColor = Color.White
 
     Row(
         modifier = Modifier
@@ -366,7 +365,7 @@ private fun SpeedSlider(
 @Composable
 private fun Modifier.glassBg(isFullscreen: Boolean, shape: androidx.compose.ui.graphics.Shape): Modifier {
     val bgColor = if (isFullscreen) Color.Black.copy(alpha = 0.55f)
-                  else Color.White.copy(alpha = 0.2f)
+                  else Color.White.copy(alpha = 0.12f)
     val borderColor = Color.White.copy(alpha = if (isFullscreen) 0.1f else 0.25f)
 
     val shimmer = rememberInfiniteTransition(label = "shimmer")
