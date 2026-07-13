@@ -1,39 +1,41 @@
 package com.xiao.wordshow.ui.display
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextAlign
+import com.xiao.wordshow.ui.display.components.StaticText
+import com.xiao.wordshow.ui.input.InputViewModel
 
 @Composable
 fun DisplayScreen(
     onNavigateBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    inputViewModel: InputViewModel
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "显示页",
-            style = MaterialTheme.typography.headlineMedium
-        )
-        // TODO: M1 Step 2 实现大字显示
-        Button(
-            onClick = onNavigateBack,
-            modifier = Modifier.padding(top = 16.dp)
+    val text by inputViewModel.text.collectAsState()
+
+    if (text.isBlank()) {
+        // 无内容时的占位提示
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            Text("返回输入")
+            Text(
+                text = "无显示内容\n请返回输入页输入文字",
+                textAlign = TextAlign.Center
+            )
         }
+    } else {
+        // 静止大字显示
+        StaticText(
+            text = text,
+            modifier = modifier
+        )
     }
 }
