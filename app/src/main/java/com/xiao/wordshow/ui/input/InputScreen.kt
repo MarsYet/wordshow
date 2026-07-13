@@ -3,7 +3,6 @@ package com.xiao.wordshow.ui.input
 import android.Manifest
 import android.content.pm.PackageManager
 import android.speech.RecognizerIntent
-import android.speech.SpeechRecognizer
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -76,7 +75,7 @@ fun InputScreen(
 
     fun startVoiceInput() {
         // 检查设备是否支持语音识别
-        if (!SpeechRecognizer.isRecognitionAvailable(context)) {
+        if (!VoiceRecognizer.isAvailable(context)) {
             voiceNotAvailable = true
             Toast.makeText(context, "此设备不支持语音识别", Toast.LENGTH_SHORT).show()
             return
