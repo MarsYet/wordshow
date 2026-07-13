@@ -91,12 +91,16 @@ fun DisplayScreen(
     fun doToggleFullscreen() {
         val willBeFullscreen = !isFullscreen
         if (willBeFullscreen) {
-            // 手机先锁横屏，再进全屏
-            if (isPhone) activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
             FullscreenUtil.enterFullscreen(activity)
+            if (isPhone) {
+                // 先隐藏系统栏，再锁横屏，避免 hide() 触发 orientation reset
+                activity.window?.decorView?.post {
+                    activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                }
+            }
         } else {
-            FullscreenUtil.exitFullscreen(activity)
             if (isPhone) activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            FullscreenUtil.exitFullscreen(activity)
             showControls = true
         }
         displayViewModel.toggleFullscreen()
