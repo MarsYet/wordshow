@@ -3,6 +3,12 @@ package com.xiao.wordshow.ui.display
 import android.content.pm.ActivityInfo
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -46,6 +52,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -115,7 +125,11 @@ fun DisplayScreen(
         }
     }
 
-    Column(modifier = modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize()) {
+        // 动态径向渐变背景 + 漂移光晕
+        AnimatedBackground()
+
+        Column(modifier = Modifier.fillMaxSize()) {
         // 文字显示区 — 控制栏上方空间内居中，支持双指缩放字号
         Box(
             modifier = Modifier
@@ -224,6 +238,7 @@ fun DisplayScreen(
                     }
                 }
             }
+        }
         }
     }
 }
@@ -346,14 +361,36 @@ private fun SpeedSlider(
 }
 
 /**
- * 液态玻璃 Modifier — 高不透明度 + 渐变 + 细边框模拟毛玻璃
+ * 液态玻璃 Modifier — 半透明 + 细边框 + Shimmer 扫光
  */
+@Composable
 private fun Modifier.glassBg(isFullscreen: Boolean, shape: androidx.compose.ui.graphics.Shape): Modifier {
     val bgColor = if (isFullscreen) Color.Black.copy(alpha = 0.55f)
-                  else Color.White.copy(alpha = 0.82f)
+                  else Color.White.copy(alpha = 0.2f)
     val borderColor = Color.White.copy(alpha = if (isFullscreen) 0.1f else 0.25f)
 
+    val shimmer = rememberInfiniteTransition(label = "shimmer")
+    val sweep by shimmer.animateFloat(-1f, 2f,
+        infiniteRepeatable(tween(2500, easing = LinearEasing), RepeatMode.Restart), "sw")
+
     return this
-        .background(bgColor, shape)
+        .clip(shape)
+        .background(bgColor)
+        .drawWithContent {
+            drawContent()
+            // 45° 倾斜扫光
+            val shimmerBrush = Brush.linearGradient(
+                colors = listOf(
+                    Color.Transparent,
+                    Color.White.copy(alpha = 0.15f),
+                    Color.White.copy(alpha = 0.25f),
+                    Color.White.copy(alpha = 0.15f),
+                    Color.Transparent,
+                ),
+                start = Offset(sweep * size.width, 0f),
+                end = Offset(sweep * size.width + size.height, size.height)
+            )
+            drawRect(shimmerBrush)
+        }
         .border(0.5.dp, borderColor, shape)
 }
