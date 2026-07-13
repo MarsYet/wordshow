@@ -371,37 +371,3 @@ private fun SpeedSlider(
     }
 }
 
-/**
- * 液态玻璃 Modifier — 半透明 + 细边框 + Shimmer 扫光
- */
-@Composable
-private fun Modifier.glassBg(isFullscreen: Boolean, shape: androidx.compose.ui.graphics.Shape): Modifier {
-    val bgColor = if (isFullscreen) Color.Black.copy(alpha = 0.55f)
-                  else Color.White.copy(alpha = 0.12f)
-    val borderColor = Color.White.copy(alpha = if (isFullscreen) 0.1f else 0.25f)
-
-    val shimmer = rememberInfiniteTransition(label = "shimmer")
-    val sweep by shimmer.animateFloat(-1f, 2f,
-        infiniteRepeatable(tween(2500, easing = LinearEasing), RepeatMode.Restart), "sw")
-
-    return this
-        .clip(shape)
-        .background(bgColor)
-        .drawWithContent {
-            drawContent()
-            // 45° 倾斜扫光
-            val shimmerBrush = Brush.linearGradient(
-                colors = listOf(
-                    Color.Transparent,
-                    Color.White.copy(alpha = 0.15f),
-                    Color.White.copy(alpha = 0.25f),
-                    Color.White.copy(alpha = 0.15f),
-                    Color.Transparent,
-                ),
-                start = Offset(sweep * size.width, 0f),
-                end = Offset(sweep * size.width + size.height, size.height)
-            )
-            drawRect(shimmerBrush)
-        }
-        .border(0.5.dp, borderColor, shape)
-}
