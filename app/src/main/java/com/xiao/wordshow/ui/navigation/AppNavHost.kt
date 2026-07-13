@@ -11,30 +11,30 @@ import com.xiao.wordshow.ui.display.DisplayScreen
 import com.xiao.wordshow.ui.display.DisplayViewModel
 import com.xiao.wordshow.ui.input.InputScreen
 import com.xiao.wordshow.ui.input.InputViewModel
+import com.xiao.wordshow.util.rememberAdaptiveParams
 
 @Composable
 fun AppNavHost() {
     val navController = rememberNavController()
-    // ViewModel 作用域在 Activity，确保跨页面共享同一实例
     val activity = LocalContext.current as ComponentActivity
     val inputViewModel: InputViewModel = viewModel(viewModelStoreOwner = activity)
     val displayViewModel: DisplayViewModel = viewModel(viewModelStoreOwner = activity)
+    val adaptive = rememberAdaptiveParams()
 
-    NavHost(
-        navController = navController,
-        startDestination = Routes.INPUT
-    ) {
+    NavHost(navController = navController, startDestination = Routes.INPUT) {
         composable(Routes.INPUT) {
             InputScreen(
                 onNavigateToDisplay = { navController.navigate(Routes.DISPLAY) },
-                inputViewModel = inputViewModel
+                inputViewModel = inputViewModel,
+                adaptive = adaptive
             )
         }
         composable(Routes.DISPLAY) {
             DisplayScreen(
                 onNavigateBack = { navController.popBackStack() },
                 inputViewModel = inputViewModel,
-                displayViewModel = displayViewModel
+                displayViewModel = displayViewModel,
+                adaptive = adaptive
             )
         }
     }

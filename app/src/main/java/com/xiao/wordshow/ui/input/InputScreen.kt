@@ -69,7 +69,8 @@ private const val SAMPLE_RATE = 16000
 fun InputScreen(
     onNavigateToDisplay: () -> Unit,
     modifier: Modifier = Modifier,
-    inputViewModel: InputViewModel
+    inputViewModel: InputViewModel,
+    adaptive: com.xiao.wordshow.util.AdaptiveParams
 ) {
     val text by inputViewModel.text.collectAsState()
     val context = LocalContext.current

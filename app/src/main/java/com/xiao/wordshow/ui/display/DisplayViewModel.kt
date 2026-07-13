@@ -35,11 +35,11 @@ class DisplayViewModel : ViewModel() {
     }
 
     fun setFontSize(size: Float) {
-        _fontSize.value = size.coerceIn(20f, 300f)
+        _fontSize.value = size.coerceIn(20f, 500f)
     }
 
     fun setScrollSpeed(speed: Float) {
-        _scrollSpeed.value = speed.coerceIn(0.2f, 10f)
+        _scrollSpeed.value = speed.coerceIn(0.2f, 15f)
     }
 
     fun setEffect(effect: TextEffect) {

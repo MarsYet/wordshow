@@ -54,6 +54,7 @@ import com.xiao.wordshow.data.model.TextEffect
 import com.xiao.wordshow.ui.display.components.ScrollingText
 import com.xiao.wordshow.ui.display.components.TextEffects
 import com.xiao.wordshow.ui.input.InputViewModel
+import com.xiao.wordshow.util.AdaptiveParams
 import com.xiao.wordshow.util.FullscreenUtil
 
 @Composable
@@ -61,7 +62,8 @@ fun DisplayScreen(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
     inputViewModel: InputViewModel,
-    displayViewModel: DisplayViewModel
+    displayViewModel: DisplayViewModel,
+    adaptive: AdaptiveParams
 ) {
     val text by inputViewModel.text.collectAsState()
     val isScrolling by displayViewModel.isScrolling.collectAsState()
@@ -137,13 +139,15 @@ fun DisplayScreen(
                 FontSizeSlider(
                     fontSize = fontSize,
                     onFontSizeChange = displayViewModel::setFontSize,
-                    isFullscreen = isFullscreen
+                    isFullscreen = isFullscreen,
+                    range = adaptive.minFontSize..adaptive.maxFontSize
                 )
                 if (isScrolling) {
                     SpeedSlider(
                         speed = scrollSpeed,
                         onSpeedChange = displayViewModel::setScrollSpeed,
-                        isFullscreen = isFullscreen
+                        isFullscreen = isFullscreen,
+                        maxSpeed = adaptive.maxScrollSpeed
                     )
                 }
                 // 控制按钮栏
@@ -209,7 +213,8 @@ fun DisplayScreen(
 private fun FontSizeSlider(
     fontSize: Float,
     onFontSizeChange: (Float) -> Unit,
-    isFullscreen: Boolean
+    isFullscreen: Boolean,
+    range: ClosedFloatingPointRange<Float>
 ) {
     val textColor = if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
     val bgColor = if (isFullscreen) Color.Black.copy(alpha = 0.4f)
@@ -232,7 +237,7 @@ private fun FontSizeSlider(
         Slider(
             value = fontSize,
             onValueChange = onFontSizeChange,
-            valueRange = 20f..300f,
+            valueRange = range,
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 8.dp),
@@ -269,7 +274,8 @@ private fun FontSizeSlider(
 private fun SpeedSlider(
     speed: Float,
     onSpeedChange: (Float) -> Unit,
-    isFullscreen: Boolean
+    isFullscreen: Boolean,
+    maxSpeed: Float
 ) {
     val textColor = if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
     val bgColor = if (isFullscreen) Color.Black.copy(alpha = 0.4f)
@@ -291,7 +297,7 @@ private fun SpeedSlider(
         Slider(
             value = speed,
             onValueChange = onSpeedChange,
-            valueRange = 0.2f..10f,
+            valueRange = 0.2f..maxSpeed,
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 8.dp),
