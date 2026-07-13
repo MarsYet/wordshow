@@ -2,6 +2,11 @@ package com.xiao.wordshow.ui.display
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,15 +34,22 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 import com.xiao.wordshow.data.model.TextEffect
 import com.xiao.wordshow.ui.display.components.ScrollingText
 import com.xiao.wordshow.ui.display.components.TextEffects
@@ -59,133 +71,137 @@ fun DisplayScreen(
     val scrollSpeed by displayViewModel.scrollSpeed.collectAsState()
 
     val activity = LocalContext.current as ComponentActivity
+    val density = LocalDensity.current
 
-    // 全屏切换副作用
-    DisposableEffect(isFullscreen) {
-        if (isFullscreen) {
-            FullscreenUtil.enterFullscreen(activity)
-        } else {
-            FullscreenUtil.exitFullscreen(activity)
-        }
-        onDispose {
-            FullscreenUtil.exitFullscreen(activity)
+    // 全屏时控制栏显隐
+    var showControls by remember { mutableStateOf(true) }
+    var controlsVisible = !isFullscreen || showControls
+
+    // 全屏自动隐藏定时器
+    LaunchedEffect(isFullscreen, showControls) {
+        if (isFullscreen && showControls) {
+            delay(3000)
+            showControls = false
         }
     }
 
+    DisposableEffect(isFullscreen) {
+        if (isFullscreen) FullscreenUtil.enterFullscreen(activity)
+        else { FullscreenUtil.exitFullscreen(activity); showControls = true }
+        onDispose { FullscreenUtil.exitFullscreen(activity) }
+    }
+
+    // 底部控制栏大约高度（用于主内容区 padding 避免覆盖）
+    val controlsHeight = if (isScrolling) 144.dp else 104.dp
+
     Box(modifier = modifier.fillMaxSize()) {
-        // 主显示区域
-        if (text.isBlank()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
+        // 主显示区域 — 底部留出控制栏空间
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = if (controlsVisible) controlsHeight else 0.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            if (text.isBlank()) {
                 Text(
                     text = "无显示内容\n请返回输入页输入文字",
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            } else if (isScrolling) {
+                ScrollingText(
+                    text = text, fontSize = fontSize.sp,
+                    speed = scrollSpeed, effectType = currentEffect
+                )
+            } else {
+                TextEffects(
+                    text = text, fontSize = fontSize.sp,
+                    effectType = currentEffect
+                )
             }
-        } else if (isScrolling) {
-            ScrollingText(
-                text = text,
-                fontSize = fontSize.sp,
-                speed = scrollSpeed,
-                effectType = currentEffect
-            )
-        } else {
-            TextEffects(
-                text = text,
-                fontSize = fontSize.sp,
-                effectType = currentEffect
+        }
+
+        // 触碰检测：全屏时点击显示控制栏
+        if (isFullscreen && !showControls) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(Unit) {
+                        detectTapGestures { showControls = true }
+                    }
             )
         }
 
-        // 底部控制区
-        Column(
-            modifier = Modifier.align(Alignment.BottomCenter)
+        // 底部控制区（全屏时淡入淡出）
+        AnimatedVisibility(
+            visible = controlsVisible,
+            modifier = Modifier.align(Alignment.BottomCenter),
+            enter = fadeIn(),
+            exit = fadeOut()
         ) {
-            // 字体大小滑块
-            FontSizeSlider(
-                fontSize = fontSize,
-                onFontSizeChange = displayViewModel::setFontSize,
-                isFullscreen = isFullscreen
-            )
-
-            // 滚动速度滑块（仅滚动模式）
-            if (isScrolling) {
-                SpeedSlider(
-                    speed = scrollSpeed,
-                    onSpeedChange = displayViewModel::setScrollSpeed,
+            Column {
+                FontSizeSlider(
+                    fontSize = fontSize,
+                    onFontSizeChange = displayViewModel::setFontSize,
                     isFullscreen = isFullscreen
                 )
-            }
-
-            // 控制按钮栏
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .then(
-                        if (isFullscreen) {
-                            Modifier.background(Color.Black.copy(alpha = 0.5f))
-                        } else {
-                            Modifier.background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f))
-                        }
-                    )
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // 返回按钮
-                IconButton(onClick = {
-                    if (isFullscreen) displayViewModel.toggleFullscreen()
-                    onNavigateBack()
-                }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "返回",
-                        tint = if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
+                if (isScrolling) {
+                    SpeedSlider(
+                        speed = scrollSpeed,
+                        onSpeedChange = displayViewModel::setScrollSpeed,
+                        isFullscreen = isFullscreen
                     )
                 }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                // 模式提示
-                Text(
-                    text = if (isScrolling) "滚动中" else "静止",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = if (isFullscreen) Color.White.copy(alpha = 0.8f)
-                           else MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                // 滚动/静止切换
-                IconButton(onClick = { displayViewModel.toggleScrolling() }) {
-                    Icon(
-                        imageVector = if (isScrolling) Icons.Filled.Stop else Icons.Filled.PlayArrow,
-                        contentDescription = if (isScrolling) "切换为静止" else "切换为滚动",
-                        tint = if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
+                // 控制按钮栏
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .then(
+                            if (isFullscreen) Modifier.background(Color.Black.copy(alpha = 0.5f))
+                            else Modifier.background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f))
+                        )
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = {
+                        if (isFullscreen) displayViewModel.toggleFullscreen()
+                        onNavigateBack()
+                    }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回",
+                            tint = if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface)
+                    }
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        if (isScrolling) "滚动中" else "静止",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = if (isFullscreen) Color.White.copy(alpha = 0.8f)
+                               else MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                }
-
-                // 特效切换
-                IconButton(onClick = { displayViewModel.cycleEffect() }) {
-                    Icon(
-                        imageVector = Icons.Filled.AutoFixHigh,
-                        contentDescription = "切换特效",
-                        tint = if (currentEffect != TextEffect.NONE)
-                            if (isFullscreen) Color(0xFFFFD93D) else MaterialTheme.colorScheme.tertiary
-                        else
-                            if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
-                    )
-                }
-
-                // 全屏切换
-                IconButton(onClick = { displayViewModel.toggleFullscreen() }) {
-                    Icon(
-                        imageVector = if (isFullscreen) Icons.Filled.FullscreenExit
-                                      else Icons.Filled.Fullscreen,
-                        contentDescription = if (isFullscreen) "退出全屏" else "全屏",
-                        tint = if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
-                    )
+                    IconButton(onClick = { displayViewModel.toggleScrolling() }) {
+                        Icon(
+                            if (isScrolling) Icons.Filled.Stop else Icons.Filled.PlayArrow,
+                            if (isScrolling) "切换为静止" else "切换为滚动",
+                            tint = if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    IconButton(onClick = { displayViewModel.cycleEffect() }) {
+                        Icon(Icons.Filled.AutoFixHigh, "切换特效",
+                            tint = if (currentEffect != TextEffect.NONE)
+                                if (isFullscreen) Color(0xFFFFD93D) else MaterialTheme.colorScheme.tertiary
+                            else if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    IconButton(onClick = {
+                        showControls = true
+                        displayViewModel.toggleFullscreen()
+                    }) {
+                        Icon(
+                            if (isFullscreen) Icons.Filled.FullscreenExit else Icons.Filled.Fullscreen,
+                            if (isFullscreen) "退出全屏" else "全屏",
+                            tint = if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 }
             }
         }
@@ -281,7 +297,7 @@ private fun SpeedSlider(
         Slider(
             value = speed,
             onValueChange = onSpeedChange,
-            valueRange = 0.2f..3f,
+            valueRange = 0.2f..10f,
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 8.dp),

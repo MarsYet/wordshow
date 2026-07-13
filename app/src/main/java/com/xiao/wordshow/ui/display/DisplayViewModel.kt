@@ -39,7 +39,7 @@ class DisplayViewModel : ViewModel() {
     }
 
     fun setScrollSpeed(speed: Float) {
-        _scrollSpeed.value = speed.coerceIn(0.2f, 3f)
+        _scrollSpeed.value = speed.coerceIn(0.2f, 10f)
     }
 
     fun setEffect(effect: TextEffect) {
