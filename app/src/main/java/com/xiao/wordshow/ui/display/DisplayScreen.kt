@@ -126,8 +126,8 @@ fun DisplayScreen(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        // 动态径向渐变背景 + 漂移光晕
-        AnimatedBackground()
+        // 动态背景（必须给 fillMaxSize 否则 Canvas 尺寸为 0）
+        AnimatedBackground(Modifier.fillMaxSize())
 
         Column(modifier = Modifier.fillMaxSize()) {
         // 文字显示区 — 控制栏上方空间内居中，支持双指缩放字号
@@ -203,7 +203,7 @@ fun DisplayScreen(
                         onNavigateBack()
                     }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回",
-                            tint = if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface)
+                            tint = Color.White)
                     }
                     Spacer(Modifier.weight(1f))
                     Text(
@@ -215,7 +215,7 @@ fun DisplayScreen(
                         Icon(
                             if (isScrolling) Icons.Filled.Stop else Icons.Filled.PlayArrow,
                             if (isScrolling) "切换为静止" else "切换为滚动",
-                            tint = if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
+                            tint = Color.White
                         )
                     }
                     IconButton(onClick = { displayViewModel.cycleEffect() }) {
@@ -232,7 +232,7 @@ fun DisplayScreen(
                         Icon(
                             if (isFullscreen) Icons.Filled.FullscreenExit else Icons.Filled.Fullscreen,
                             if (isFullscreen) "退出全屏" else "全屏",
-                            tint = if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
+                            tint = Color.White
                         )
                     }
                 }
