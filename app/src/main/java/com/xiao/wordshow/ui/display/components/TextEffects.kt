@@ -13,7 +13,10 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -42,7 +45,8 @@ fun EffectText(
     maxLines: Int = 1,
     softWrap: Boolean = false,
     textAlign: TextAlign = TextAlign.Center,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onTextLayout: ((androidx.compose.ui.text.TextLayoutResult) -> Unit)? = null
 ) {
     val baseStyle = TextStyle(
         fontSize = fontSize,
@@ -58,7 +62,8 @@ fun EffectText(
                 maxLines = maxLines,
                 softWrap = softWrap,
                 textAlign = textAlign,
-                modifier = modifier
+                modifier = modifier,
+                onTextLayout = onTextLayout
             )
         }
         TextEffect.GRADIENT -> {
@@ -68,6 +73,7 @@ fun EffectText(
                 softWrap = softWrap,
                 textAlign = textAlign,
                 modifier = modifier,
+                onTextLayout = onTextLayout,
                 style = baseStyle.copy(
                     brush = Brush.horizontalGradient(
                         listOf(
@@ -87,6 +93,7 @@ fun EffectText(
                 softWrap = softWrap,
                 textAlign = textAlign,
                 modifier = modifier,
+                onTextLayout = onTextLayout,
                 style = baseStyle.copy(
                     color = Color(0xFFFFEB3B),
                     shadow = Shadow(
@@ -99,6 +106,7 @@ fun EffectText(
         }
         TextEffect.GLOW -> {
             // 双层：背景发光层 + 前景白色文字
+            // 只在前景文字上回调 onTextLayout（避免重复）
             Box(modifier = modifier, contentAlignment = Alignment.Center) {
                 Text(
                     text = text,
@@ -119,6 +127,7 @@ fun EffectText(
                     maxLines = maxLines,
                     softWrap = softWrap,
                     textAlign = textAlign,
+                    onTextLayout = onTextLayout,
                     style = baseStyle.copy(color = Color.White)
                 )
             }
@@ -141,6 +150,7 @@ fun EffectText(
                 softWrap = softWrap,
                 textAlign = textAlign,
                 modifier = modifier.graphicsLayer { scaleX = scale; scaleY = scale },
+                onTextLayout = onTextLayout,
                 style = baseStyle.copy(color = Color.hsl(hue, 1f, 0.5f))
             )
         }
@@ -148,8 +158,7 @@ fun EffectText(
 }
 
 /**
- * 静态显示专用 — 居中 + 多行 + 自适应缩放
- * 文字越长自动缩小，确保完全显示在屏幕内
+ * 静态显示专用 — 居中 + 实测溢出自动缩小
  */
 @Composable
 fun TextEffects(
@@ -159,14 +168,10 @@ fun TextEffects(
     modifier: Modifier = Modifier
 ) {
     val baseSp = fontSize.value
-    // 自适应缩放：短字大，长字小。64sp下约每行5个中文字，10行≈50字满屏
-    val adaptiveSp = remember(text, baseSp) {
-        val charCount = text.length.coerceAtLeast(1)
-        // 满屏参考字符数（基于中文字宽≈字号）
-        val fullScreenChars = 50f
-        val scale = (fullScreenChars / charCount).coerceIn(0.25f, 1f)
-        (baseSp * scale).coerceAtLeast(16f)
-    }
+    // 溢出检测：从目标字号开始，每次溢出缩小 12%，直到不溢出或达下限
+    var effectiveSp by remember(text, baseSp) { mutableFloatStateOf(baseSp) }
+    // 每段文本只做一次缩放决策，避免无限循环
+    var settled by remember(text, baseSp) { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -178,10 +183,17 @@ fun TextEffects(
         EffectText(
             text = text,
             effectType = effectType,
-            fontSize = adaptiveSp.sp,
+            fontSize = effectiveSp.sp,
             maxLines = 20,
             softWrap = true,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            onTextLayout = { result ->
+                if (!settled && result.hasVisualOverflow && effectiveSp > 16f) {
+                    effectiveSp = (effectiveSp * 0.88f).coerceAtLeast(16f)
+                } else {
+                    settled = true
+                }
+            }
         )
     }
 }
