@@ -8,15 +8,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.xiao.wordshow.ui.display.DisplayScreen
+import com.xiao.wordshow.ui.display.DisplayViewModel
 import com.xiao.wordshow.ui.input.InputScreen
 import com.xiao.wordshow.ui.input.InputViewModel
 
 @Composable
 fun AppNavHost() {
     val navController = rememberNavController()
-    // ViewModel 作用域在 Activity，确保 InputScreen 和 DisplayScreen 共享同一实例
+    // ViewModel 作用域在 Activity，确保跨页面共享同一实例
     val activity = LocalContext.current as ComponentActivity
     val inputViewModel: InputViewModel = viewModel(viewModelStoreOwner = activity)
+    val displayViewModel: DisplayViewModel = viewModel(viewModelStoreOwner = activity)
 
     NavHost(
         navController = navController,
@@ -31,7 +33,8 @@ fun AppNavHost() {
         composable(Routes.DISPLAY) {
             DisplayScreen(
                 onNavigateBack = { navController.popBackStack() },
-                inputViewModel = inputViewModel
+                inputViewModel = inputViewModel,
+                displayViewModel = displayViewModel
             )
         }
     }
