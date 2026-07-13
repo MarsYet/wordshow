@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -89,11 +90,17 @@ fun DisplayScreen(
     }
 
     Column(modifier = modifier.fillMaxSize()) {
-        // 文字显示区 — 控制栏上方空间内居中
+        // 文字显示区 — 控制栏上方空间内居中，支持双指缩放字号
         Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
+                .pointerInput(Unit) {
+                    detectTransformGestures { _, _, zoom, _ ->
+                        val newSize = fontSize * zoom
+                        displayViewModel.setFontSize(newSize)
+                    }
+                }
                 .then(
                     if (isFullscreen && !showControls) {
                         Modifier.pointerInput(Unit) { detectTapGestures { showControls = true } }
