@@ -249,7 +249,7 @@ fun DisplayScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 10.dp, vertical = 4.dp)
-                        .shadow(6.dp, RoundedCornerShape(18.dp), spotColor = Color.Black.copy(alpha = 0.2f))
+                        .shadow(8.dp, RoundedCornerShape(18.dp), spotColor = Color.Black.copy(alpha = 0.25f))
                         .background(
                             Brush.verticalGradient(listOf(Color(0xFF3A3A3A), Color(0xFF2A2A2A), Color(0xFF222222))),
                             RoundedCornerShape(18.dp)
@@ -374,7 +374,7 @@ private fun FontSizeSlider(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 10.dp)
-            .shadow(5.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.18f))
+            .shadow(7.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.22f))
             .background(sliderBg, RoundedCornerShape(12.dp))
             .border(0.5.dp, sliderBorder, RoundedCornerShape(12.dp))
             .padding(horizontal = 8.dp, vertical = 2.dp),
@@ -436,7 +436,7 @@ private fun SpeedSlider(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 10.dp)
-            .shadow(5.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.18f))
+            .shadow(7.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.22f))
             .background(sliderBg, RoundedCornerShape(12.dp))
             .border(0.5.dp, sliderBorder, RoundedCornerShape(12.dp))
             .padding(horizontal = 8.dp, vertical = 2.dp),

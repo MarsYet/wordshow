@@ -230,7 +230,7 @@ fun InputScreen(
 
             Button(
                 onClick = { navigate() },
-                modifier = Modifier.fillMaxWidth().height(52.dp).shadow(6.dp, RoundedCornerShape(26.dp), spotColor = Color.Black.copy(alpha = 0.15f)),
+                modifier = Modifier.fillMaxWidth().height(52.dp).shadow(8.dp, RoundedCornerShape(26.dp), spotColor = Color.Black.copy(alpha = 0.22f)),
                 enabled = text.isNotBlank(),
                 shape = RoundedCornerShape(26.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -282,7 +282,7 @@ private fun MicButton(isRecording: Boolean, onPress: () -> Unit, onRelease: () -
     val pulseAlpha by if (isRecording) rememberInfiniteTransition(label = "mic").animateFloat(1f, 0.3f, infiniteRepeatable(tween(600), RepeatMode.Reverse), label = "a") else remember { mutableStateOf(1f) }
     val bg = when { isRecording -> Color(0xFFFFE8E0); isPressed -> Color(0xCCF0F2F4); else -> Color(0xEEFFFFFF) }
     val fg = when { isRecording -> Color(0xFFD84040); else -> Color(0xFF5B6A7A) }
-    Box(modifier.size(56.dp).clip(CircleShape).shadow(5.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.15f)).background(bg).clickable(interactionSource, indication = null, onClick = {}), contentAlignment = Alignment.Center) {
+    Box(modifier.size(56.dp).clip(CircleShape).shadow(7.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.2f)).background(bg).clickable(interactionSource, indication = null, onClick = {}), contentAlignment = Alignment.Center) {
         Icon(Icons.Filled.KeyboardVoice, "按住说话", Modifier.size(28.dp).alpha(pulseAlpha), tint = fg)
     }
 }
@@ -345,7 +345,7 @@ fun BoardSubtitleToggle(isBoard: Boolean, onToggle: (Boolean) -> Unit, modifier:
     Box(
         modifier = modifier
             .width(trackWidth).height(thumbSize + trackPadding * 2)
-            .shadow(5.dp, RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.15f))
+            .shadow(7.dp, RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.2f))
             .background(
                 Brush.verticalGradient(listOf(Color(0xEEFFFFFF), Color(0xCCF0F2F4))),
                 RoundedCornerShape(20.dp)
@@ -369,7 +369,7 @@ fun BoardSubtitleToggle(isBoard: Boolean, onToggle: (Boolean) -> Unit, modifier:
             Modifier
                 .offset(x = trackPadding + ((thumbOffset * (trackWidth - thumbSize - trackPadding * 2).value).dp))
                 .size(thumbSize)
-                .shadow(5.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.18f))
+                .shadow(7.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.22f))
                 .background(
                     Brush.verticalGradient(listOf(Color.White, Color(0xFFF0F2F4))),
                     CircleShape
