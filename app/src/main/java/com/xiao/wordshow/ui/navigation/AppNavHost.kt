@@ -16,6 +16,7 @@ import com.xiao.wordshow.ui.display.DisplayScreen
 import com.xiao.wordshow.ui.display.DisplayViewModel
 import com.xiao.wordshow.ui.input.InputScreen
 import com.xiao.wordshow.ui.input.InputViewModel
+import com.xiao.wordshow.ui.settings.SettingsScreen
 import com.xiao.wordshow.util.rememberAdaptiveParams
 
 @Composable
@@ -35,6 +36,7 @@ fun AppNavHost() {
         ) {
             InputScreen(
                 onNavigateToDisplay = { navController.navigate(Routes.DISPLAY) },
+                onNavigateToSettings = { navController.navigate(Routes.SETTINGS) },
                 inputViewModel = inputViewModel,
                 adaptive = adaptive,
                 repo = repo
@@ -51,6 +53,17 @@ fun AppNavHost() {
                 displayViewModel = displayViewModel,
                 adaptive = adaptive,
                 repo = repo
+            )
+        }
+        composable(
+            route = Routes.SETTINGS,
+            enterTransition = { fadeIn(spring()) },
+            exitTransition = { fadeOut(spring()) },
+        ) {
+            SettingsScreen(
+                onBack = { navController.popBackStack() },
+                repo = repo,
+                displayViewModel = displayViewModel
             )
         }
     }

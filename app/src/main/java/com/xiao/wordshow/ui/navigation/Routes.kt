@@ -6,5 +6,5 @@ package com.xiao.wordshow.ui.navigation
 object Routes {
     const val INPUT = "input"
     const val DISPLAY = "display"
-    const val SETTINGS = "settings"
+    const val SETTINGS = "settings_page"
 }

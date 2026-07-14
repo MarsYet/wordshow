@@ -87,4 +87,47 @@ class HistoryRepository(private val context: Context) {
     suspend fun setLightBackground(light: Boolean) {
         context.dataStore.edit { it[KEY_LIGHT_BG] = light }
     }
+
+    // 颜色模式：system/dark/light
+    private val KEY_COLOR_MODE = stringPreferencesKey("color_mode")
+
+    val colorMode: Flow<String> = context.dataStore.data.map { it[KEY_COLOR_MODE] ?: "system" }
+
+    suspend fun setColorMode(mode: String) {
+        context.dataStore.edit { it[KEY_COLOR_MODE] = mode }
+    }
+
+    // 预设配置
+    private val KEY_PRESET_NAMES = stringSetPreferencesKey("preset_names")
+    private fun presetKey(name: String) = stringPreferencesKey("preset_$name")
+
+    val presetNames: Flow<List<String>> = context.dataStore.data.map { prefs ->
+        prefs[KEY_PRESET_NAMES]?.toList() ?: emptyList()
+    }
+
+    suspend fun savePreset(name: String, config: String) {
+        context.dataStore.edit { prefs ->
+            val names = prefs[KEY_PRESET_NAMES]?.toMutableSet() ?: mutableSetOf()
+            names.add(name)
+            prefs[KEY_PRESET_NAMES] = names
+            prefs[presetKey(name)] = config
+        }
+    }
+
+    suspend fun loadPreset(name: String): String? {
+        return context.dataStore.data.map { it[presetKey(name)] }.let { flow ->
+            var result: String? = null
+            flow.collect { result = it }
+            result
+        }
+    }
+
+    suspend fun deletePreset(name: String) {
+        context.dataStore.edit { prefs ->
+            val names = prefs[KEY_PRESET_NAMES]?.toMutableSet() ?: mutableSetOf()
+            names.remove(name)
+            prefs[KEY_PRESET_NAMES] = names
+            prefs.remove(presetKey(name))
+        }
+    }
 }
