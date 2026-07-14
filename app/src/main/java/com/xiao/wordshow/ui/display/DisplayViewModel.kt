@@ -71,7 +71,11 @@ class DisplayViewModel : ViewModel() {
     val fontIndex: StateFlow<Int> = _fontIndex.asStateFlow()
 
     fun setFont(index: Int) {
-        _fontIndex.value = index.coerceIn(0, 4)
+        _fontIndex.value = index.coerceIn(0, fontCount - 1)
+    }
+
+    companion object {
+        val fontCount get() = 7
     }
 
     fun setColor(index: Int) {

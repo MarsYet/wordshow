@@ -66,6 +66,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
@@ -79,6 +80,17 @@ import com.xiao.wordshow.ui.display.components.TextEffects
 import com.xiao.wordshow.ui.input.InputViewModel
 import com.xiao.wordshow.util.AdaptiveParams
 import com.xiao.wordshow.util.FullscreenUtil
+
+private val fontOptions: List<Pair<FontFamily, FontWeight>> = listOf(
+    FontFamily.Default to FontWeight.Normal,
+    FontFamily.Default to FontWeight.Bold,
+    FontFamily.Default to FontWeight.Light,
+    FontFamily.Serif to FontWeight.Bold,
+    FontFamily.SansSerif to FontWeight.Light,
+    FontFamily.Monospace to FontWeight.Bold,
+    FontFamily.Cursive to FontWeight.Bold,
+)
+private val fontNames = listOf("默认", "默认粗体", "默认细体", "衬线", "无衬线细", "等宽", "手写")
 
 @Composable
 fun DisplayScreen(
@@ -126,10 +138,9 @@ fun DisplayScreen(
     val scope = rememberCoroutineScope()
     val contentColor = if (isLightBg) Color.Black else Color.White
     val textColor = if (colorIndex == 0) contentColor else com.xiao.wordshow.ui.display.presetTextColors[colorIndex - 1]
-    val fontFamily = listOf(
-        FontFamily.Default, FontFamily.Serif, FontFamily.SansSerif,
-        FontFamily.Monospace, FontFamily.Cursive
-    )[fontIndex]
+    val fontEntry: Pair<FontFamily, FontWeight> = fontOptions[fontIndex]
+    val fontFamily: FontFamily = fontEntry.first
+    val fontWeight: FontWeight = fontEntry.second
     val controlBg = if (isLightBg) Brush.verticalGradient(listOf(Color.White, Color(0xFFF0F0F0), Color(0xFFE0E0E0)))
                    else Brush.verticalGradient(listOf(Color(0xFF3A3A3A), Color(0xFF2A2A2A), Color(0xFF222222)))
     val sliderBg = if (isLightBg) Brush.verticalGradient(listOf(Color(0xFFF5F5F5), Color(0xFFE8E8E8)))
@@ -198,13 +209,13 @@ fun DisplayScreen(
                 ScrollingText(
                     text = text, fontSize = fontSize.sp,
                     speed = scrollSpeed, effectType = currentEffect,
-                    textColor = textColor, fontFamily = fontFamily
+                    textColor = textColor, fontFamily = fontFamily, fontWeight = fontWeight
                 )
             } else {
                 TextEffects(
                     text = text, fontSize = fontSize.sp,
                     effectType = currentEffect,
-                    textColor = textColor, fontFamily = fontFamily
+                    textColor = textColor, fontFamily = fontFamily, fontWeight = fontWeight
                 )
             }
         }
@@ -283,12 +294,11 @@ fun DisplayScreen(
                                 tint = if (fontIndex != 0) Color(0xFF4FC3F7) else contentColor)
                         }
                         DropdownMenu(expanded = fontMenu, onDismissRequest = { fontMenu = false },
-                            offset = androidx.compose.ui.unit.DpOffset(0.dp, (-320).dp)) {
-                            val fonts = listOf("默认", "衬线", "无衬线", "等宽", "手写")
-                            val fontFamilies = listOf(FontFamily.Default, FontFamily.Serif, FontFamily.SansSerif, FontFamily.Monospace, FontFamily.Cursive)
-                            fonts.forEachIndexed { i, name ->
+                            offset = androidx.compose.ui.unit.DpOffset(0.dp, (-280).dp)) {
+                            fontOptions.forEachIndexed { i, pair ->
+                                val fam = pair.first
                                 DropdownMenuItem(
-                                    text = { Text(name, fontFamily = fontFamilies[i], color = if (i == fontIndex) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface) },
+                                    text = { Text(fontNames[i], fontFamily = fam, color = if (i == fontIndex) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface) },
                                     onClick = { displayViewModel.setFont(i); fontMenu = false },
                                     leadingIcon = if (i == fontIndex) { { Icon(Icons.Filled.FormatSize, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)) } } else null
                                 )

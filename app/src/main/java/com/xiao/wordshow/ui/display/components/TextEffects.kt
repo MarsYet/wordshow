@@ -49,13 +49,13 @@ fun EffectText(
     modifier: Modifier = Modifier,
     onTextLayout: ((androidx.compose.ui.text.TextLayoutResult) -> Unit)? = null,
     textColor: Color = Color.White,
-    fontFamily: FontFamily = FontFamily.Default
+    fontFamily: FontFamily = FontFamily.Default,
+    fontWeight: FontWeight = FontWeight.Bold
 ) {
-    // 行距跟随字号等比缩放，防止多行堆叠
     val lineHeightScale = 1.5f
     val baseStyle = TextStyle(
         fontSize = fontSize,
-        fontWeight = FontWeight.Bold,
+        fontWeight = fontWeight,
         fontFamily = fontFamily,
         lineHeight = (fontSize.value * lineHeightScale).sp
     )
@@ -64,15 +64,12 @@ fun EffectText(
         TextEffect.NONE -> {
             Text(
                 text = text,
-                fontSize = fontSize,
-                fontWeight = FontWeight.Bold,
-                color = textColor,
-                lineHeight = (fontSize.value * 1.5f).sp,
                 maxLines = maxLines,
                 softWrap = softWrap,
                 textAlign = textAlign,
                 modifier = modifier,
-                onTextLayout = onTextLayout
+                onTextLayout = onTextLayout,
+                style = baseStyle.copy(color = textColor)
             )
         }
         TextEffect.GRADIENT -> {
@@ -198,7 +195,8 @@ fun TextEffects(
     fontSize: TextUnit = 64.sp,
     modifier: Modifier = Modifier,
     textColor: Color = Color.White,
-    fontFamily: FontFamily = FontFamily.Default
+    fontFamily: FontFamily = FontFamily.Default,
+    fontWeight: FontWeight = FontWeight.Bold
 ) {
     val baseSp = fontSize.value
     // 溢出检测：从目标字号开始，每次溢出缩小 12%，直到不溢出或达下限
@@ -222,6 +220,7 @@ fun TextEffects(
             textAlign = TextAlign.Center,
             textColor = textColor,
             fontFamily = fontFamily,
+            fontWeight = fontWeight,
             onTextLayout = { result ->
                 if (!settled && result.hasVisualOverflow && effectiveSp > 10f) {
                     effectiveSp = (effectiveSp * 0.82f).coerceAtLeast(10f)

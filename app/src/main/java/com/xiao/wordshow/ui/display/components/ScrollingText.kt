@@ -39,7 +39,8 @@ fun ScrollingText(
     effectType: TextEffect = TextEffect.NONE,
     modifier: Modifier = Modifier,
     textColor: Color = Color.White,
-    fontFamily: androidx.compose.ui.text.font.FontFamily = androidx.compose.ui.text.font.FontFamily.Default
+    fontFamily: androidx.compose.ui.text.font.FontFamily = androidx.compose.ui.text.font.FontFamily.Default,
+    fontWeight: androidx.compose.ui.text.font.FontWeight = androidx.compose.ui.text.font.FontWeight.Bold
 ) {
     BoxWithConstraints(modifier = modifier) {
         val containerWidthPx = constraints.maxWidth.toFloat()
@@ -107,6 +108,7 @@ fun ScrollingText(
                 textAlign = TextAlign.Left,
                 textColor = textColor,
                 fontFamily = fontFamily,
+                fontWeight = fontWeight,
                 modifier = Modifier
                     .wrapContentWidth(unbounded = true)
                     .onSizeChanged { textWidthPx = it.width.toFloat() }
