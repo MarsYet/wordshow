@@ -32,7 +32,7 @@ fun SettingsScreen(
     displayViewModel: DisplayViewModel
 ) {
     val scope = rememberCoroutineScope()
-    val colorMode = displayViewModel.colorMode
+    val colorMode by displayViewModel.colorMode.collectAsState()
     // 实时收集当前显示配置
     val currentFont by displayViewModel.fontIndex.collectAsState()
     val currentColor by displayViewModel.colorIndex.collectAsState()

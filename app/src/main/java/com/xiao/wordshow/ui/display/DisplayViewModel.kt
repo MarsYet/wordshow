@@ -56,15 +56,15 @@ class DisplayViewModel : ViewModel() {
         _currentEffect.value = effects[nextIndex]
     }
 
-    // 颜色模式 — 用 mutableStateOf 直接观察
-    var colorMode by mutableStateOf("system")
-        private set
+    // 颜色模式
+    private val _colorMode = MutableStateFlow("system")
+    val colorMode: StateFlow<String> = _colorMode.asStateFlow()
 
     private val _isLightBg = MutableStateFlow(true)
     val isLightBg: StateFlow<Boolean> = _isLightBg.asStateFlow()
 
     fun setColorMode(mode: String, isSystemLight: Boolean) {
-        colorMode = mode
+        _colorMode.value = mode
         _isLightBg.value = when (mode) { "light" -> true; "dark" -> false; else -> isSystemLight }
     }
 
