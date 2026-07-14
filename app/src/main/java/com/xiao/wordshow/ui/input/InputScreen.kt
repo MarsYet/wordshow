@@ -230,12 +230,12 @@ fun InputScreen(
 
             Button(
                 onClick = { navigate() },
-                modifier = Modifier.fillMaxWidth().height(52.dp).shadow(4.dp, RoundedCornerShape(26.dp), spotColor = Color(0xFFC8BBA8).copy(alpha = 0.35f)),
+                modifier = Modifier.fillMaxWidth().height(52.dp).shadow(3.dp, RoundedCornerShape(26.dp), spotColor = Color(0xFFD0C8B8).copy(alpha = 0.3f)),
                 enabled = text.isNotBlank(),
                 shape = RoundedCornerShape(26.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFF5EDE3), contentColor = Color(0xFF3E3640),
-                    disabledContainerColor = Color(0xFFF0E8DC), disabledContentColor = Color(0xFFB0A898),
+                    containerColor = Color(0xFFFCFAF5), contentColor = Color(0xFF3E3640),
+                    disabledContainerColor = Color(0xFFF5F0E8), disabledContentColor = Color(0xFFC0B8A8),
                 )
             ) { Text("进入显示", style = MaterialTheme.typography.titleMedium) }
         }
@@ -280,7 +280,7 @@ private fun MicButton(isRecording: Boolean, onPress: () -> Unit, onRelease: () -
     LaunchedEffect(isPressed) { if (isPressed && !isRecording) onPress() }
     LaunchedEffect(isPressed, isRecording) { if (!isPressed && isRecording) onRelease() }
     val pulseAlpha by if (isRecording) rememberInfiniteTransition(label = "mic").animateFloat(1f, 0.3f, infiniteRepeatable(tween(600), RepeatMode.Reverse), label = "a") else remember { mutableStateOf(1f) }
-    val bg = when { isRecording -> Color(0xFFFFE8E0); isPressed -> Color(0xFFF5EDE3); else -> Color(0xFFF5EDE3) }
+    val bg = when { isRecording -> Color(0xFFFFE8E0); isPressed -> Color(0xFFF8F4EC); else -> Color(0xFFFCFAF5) }
     val fg = when { isRecording -> Color(0xFFD84040); else -> Color(0xFF6B5E50) }
     Box(modifier.size(56.dp).clip(CircleShape).shadow(3.dp, CircleShape, spotColor = Color(0xFFC8BBA8).copy(alpha = 0.35f)).background(bg).clickable(interactionSource, indication = null, onClick = {}), contentAlignment = Alignment.Center) {
         Icon(Icons.Filled.KeyboardVoice, "按住说话", Modifier.size(28.dp).alpha(pulseAlpha), tint = fg)
@@ -345,12 +345,12 @@ fun BoardSubtitleToggle(isBoard: Boolean, onToggle: (Boolean) -> Unit, modifier:
     Box(
         modifier = modifier
             .width(trackWidth).height(thumbSize + trackPadding * 2)
-            .shadow(3.dp, RoundedCornerShape(20.dp), spotColor = Color(0xFFC8BBA8).copy(alpha = 0.4f))
+            .shadow(3.dp, RoundedCornerShape(20.dp), spotColor = Color(0xFFD0C8B8).copy(alpha = 0.3f))
             .background(
-                Brush.verticalGradient(listOf(Color(0xFFF5EDE0), Color(0xFFE8DDD0))),
+                Brush.verticalGradient(listOf(Color(0xFFFEFCF8), Color(0xFFF6F0E8))),
                 RoundedCornerShape(20.dp)
             )
-            .border(0.5.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
+            .border(0.5.dp, Color.White, RoundedCornerShape(20.dp))
             .clickable { onToggle(!isBoard) },
         contentAlignment = Alignment.CenterStart
     ) {
@@ -369,12 +369,12 @@ fun BoardSubtitleToggle(isBoard: Boolean, onToggle: (Boolean) -> Unit, modifier:
             Modifier
                 .offset(x = trackPadding + ((thumbOffset * (trackWidth - thumbSize - trackPadding * 2).value).dp))
                 .size(thumbSize)
-                .shadow(4.dp, CircleShape, spotColor = Color(0xFFC8BBA8).copy(alpha = 0.5f))
+                .shadow(4.dp, CircleShape, spotColor = Color(0xFFD0C8B8).copy(alpha = 0.4f))
                 .background(
-                    Brush.verticalGradient(listOf(Color(0xFFFFFBF7), Color(0xFFF0E6D6))),
+                    Brush.verticalGradient(listOf(Color.White, Color(0xFFF8F2EA))),
                     CircleShape
                 )
-                .border(0.5.dp, Color.White.copy(alpha = 0.6f), CircleShape)
+                .border(0.5.dp, Color.White, CircleShape)
         )
     }
 }
