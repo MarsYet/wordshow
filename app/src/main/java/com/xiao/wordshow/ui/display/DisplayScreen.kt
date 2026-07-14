@@ -127,10 +127,11 @@ fun DisplayScreen(
     val currentIndex by displayViewModel.currentSentenceIndex.collectAsState()
     val isPlaying by displayViewModel.isSubtitlePlaying.collectAsState()
 
-    // 自动播放字幕
-    LaunchedEffect(isPlaying, currentIndex) {
+    // 自动播放字幕（速度用 scrollSpeed 控制）
+    LaunchedEffect(isPlaying, currentIndex, scrollSpeed) {
         if (!isBoardMode && isPlaying && subtitleSentences.isNotEmpty()) {
-            delay(3000)
+            val interval = (3000 / scrollSpeed).toLong().coerceIn(500, 10000)
+            delay(interval)
             if (currentIndex < subtitleSentences.lastIndex) {
                 displayViewModel.nextSentence()
             }
@@ -252,6 +253,9 @@ fun DisplayScreen(
             Column {
                 // 字幕模式：简化操控栏
                 if (!isBoardMode && subtitleSentences.isNotEmpty()) {
+                    // 字幕模式：字号+速度+导航
+                    FontSizeSlider(fontSize = fontSize, onFontSizeChange = displayViewModel::setFontSize, isFullscreen = isFullscreen, range = adaptive.minFontSize..adaptive.maxFontSize, textColor = contentColor, sliderBg = sliderBg, sliderBorder = sliderBorder)
+                    SpeedSlider(speed = scrollSpeed, onSpeedChange = displayViewModel::setScrollSpeed, isFullscreen = isFullscreen, maxSpeed = adaptive.maxScrollSpeed, textColor = contentColor, sliderBg = sliderBg, sliderBorder = sliderBorder)
                     Row(
                         Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp)
                             .shadow(14.dp, RoundedCornerShape(18.dp), spotColor = Color.Black.copy(alpha = 0.2f))
