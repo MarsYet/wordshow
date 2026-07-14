@@ -44,8 +44,10 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.KeyboardVoice
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -113,8 +115,9 @@ fun InputScreen(
     val history by repo.history.collectAsState(initial = emptyList())
     val presets by repo.presets.collectAsState(initial = HistoryRepository.DEFAULT_PRESETS.toList())
 
-    // 历史弹窗
+    // 弹窗状态
     var showHistory by remember { mutableStateOf(false) }
+    var showPresetManager by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     DisposableEffect(Unit) {
@@ -228,7 +231,7 @@ fun InputScreen(
                         )
                     }
                 } else {
-                    // 展板模式：两行FlowRow预设短语
+                    // 展板模式：两行FlowRow预设短语 + 添加按钮
                     @OptIn(ExperimentalLayoutApi::class)
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
@@ -242,6 +245,15 @@ fun InputScreen(
                                 shape = RoundedCornerShape(20.dp)
                             )
                         }
+                        // 添加按钮
+                        SuggestionChip(
+                            onClick = { showPresetManager = true },
+                            label = { Text("＋", style = MaterialTheme.typography.labelMedium) },
+                            shape = RoundedCornerShape(20.dp),
+                            colors = androidx.compose.material3.SuggestionChipDefaults.suggestionChipColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                            )
+                        )
                     }
                 }
             }
@@ -289,6 +301,48 @@ fun InputScreen(
 
         // 声纹
         if (isRecording) VoiceWaveBars(currentAmplitude, Modifier.align(Alignment.BottomCenter).padding(bottom = 32.dp))
+    }
+
+    // 预设管理弹窗
+    if (showPresetManager) {
+        var newPresetInput by remember { mutableStateOf("") }
+        AlertDialog(
+            onDismissRequest = { showPresetManager = false },
+            title = { Text("管理常用短语") },
+            text = {
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        OutlinedTextField(
+                            value = newPresetInput,
+                            onValueChange = { newPresetInput = it },
+                            modifier = Modifier.weight(1f),
+                            label = { Text("新短语") },
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Button(onClick = {
+                            if (newPresetInput.isNotBlank()) {
+                                scope.launch { repo.addPreset(newPresetInput) }
+                                newPresetInput = ""
+                            }
+                        }) { Text("添加") }
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    if (presets.isNotEmpty()) {
+                        presets.forEach { p ->
+                            Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Text(p, modifier = Modifier.weight(1f))
+                                IconButton(onClick = { scope.launch { repo.removePreset(p) } }) {
+                                    Icon(Icons.Filled.Delete, "删除", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { showPresetManager = false }) { Text("完成") } }
+        )
     }
 
     // 历史记录弹窗
