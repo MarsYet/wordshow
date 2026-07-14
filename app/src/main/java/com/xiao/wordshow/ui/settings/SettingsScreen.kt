@@ -13,8 +13,10 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import android.widget.Toast
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.xiao.wordshow.data.model.TextEffect
 import com.xiao.wordshow.data.preferences.HistoryRepository
@@ -60,7 +62,9 @@ fun SettingsScreen(
                 modes.forEach { (key, label) ->
                     Row(
                         Modifier.fillMaxWidth().clickable {
-                            scope.launch { repo.setColorMode(key); displayViewModel.setColorMode(key, systemIsLight) }
+                            displayViewModel.setColorMode(key, systemIsLight)
+                            // DataStore 后台写入，不阻塞 UI
+                            kotlinx.coroutines.GlobalScope.launch { try { repo.setColorMode(key) } catch (_: Exception) {} }
                         }.padding(vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -96,7 +100,8 @@ fun SettingsScreen(
                     Card(
                         Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable {
                             scope.launch {
-                                repo.loadPreset(name)?.let { applyPreset(it, displayViewModel) }
+                                val config = repo.loadPreset(name)
+                                config?.let { applyPreset(it, displayViewModel) }
                             }
                         },
                         shape = RoundedCornerShape(12.dp),
