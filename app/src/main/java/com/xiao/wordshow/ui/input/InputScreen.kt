@@ -329,11 +329,12 @@ fun InputScreen(
                         Spacer(Modifier.width(8.dp))
                         Button(onClick = {
                             val txt = newPresetInput.trim()
-                            if (txt.isNotBlank() && txt !in presets) {
-                                presets = presets + txt
-                                scope.launch { repo.addPreset(txt) }
-                                newPresetInput = ""
-                            }
+                            if (txt.isBlank()) return@Button
+                            if (txt in presets) { Toast.makeText(context, "已存在", Toast.LENGTH_SHORT).show(); return@Button }
+                            presets = presets + txt
+                            scope.launch { repo.addPreset(txt) }
+                            newPresetInput = ""
+                            Toast.makeText(context, "已添加", Toast.LENGTH_SHORT).show()
                         }) { Text("添加") }
                     }
                     Spacer(Modifier.height(12.dp))
