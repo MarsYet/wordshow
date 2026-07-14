@@ -37,7 +37,10 @@ import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.TextDecrease
 import androidx.compose.material.icons.filled.TextIncrease
 import androidx.compose.material3.DropdownMenu
@@ -265,10 +268,16 @@ fun DisplayScreen(
                         Arrangement.SpaceEvenly, Alignment.CenterVertically
                     ) {
                         IconButton(onClick = { if (isFullscreen) doToggleFullscreen(); onNavigateBack() }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回", tint = contentColor) }
-                        IconButton(onClick = { displayViewModel.prevSentence() }) { Text("⏮", fontSize = 22.sp) }
+                        IconButton(onClick = { displayViewModel.prevSentence() }) {
+                            Icon(Icons.Filled.SkipPrevious, "上一句", tint = contentColor)
+                        }
                         Text("${currentIndex + 1}/${subtitleSentences.size}", style = MaterialTheme.typography.titleSmall, color = contentColor)
-                        IconButton(onClick = { displayViewModel.togglePlayPause() }) { Text(if (isPlaying) "⏸" else "▶", fontSize = 22.sp) }
-                        IconButton(onClick = { displayViewModel.nextSentence() }) { Text("⏭", fontSize = 22.sp) }
+                        IconButton(onClick = { displayViewModel.togglePlayPause() }) {
+                            Icon(if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow, if (isPlaying) "暂停" else "播放", tint = contentColor)
+                        }
+                        IconButton(onClick = { displayViewModel.nextSentence() }) {
+                            Icon(Icons.Filled.SkipNext, "下一句", tint = contentColor)
+                        }
                         IconButton(onClick = { showControls = true; doToggleFullscreen() }) {
                             Icon(if (isFullscreen) Icons.Filled.FullscreenExit else Icons.Filled.Fullscreen, "全屏", tint = contentColor)
                         }
