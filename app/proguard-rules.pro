@@ -16,3 +16,6 @@
 # 讯飞 SparkChain SDK
 -keep class com.iflytek.sparkchain.** {*;}
 -keep class com.iflytek.sparkchain.**
+# SparkChain 依赖 Gson
+-keep class com.google.gson.** {*;}
+-dontwarn com.google.gson.**
