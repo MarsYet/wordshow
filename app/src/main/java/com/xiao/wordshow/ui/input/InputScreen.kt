@@ -154,7 +154,8 @@ fun InputScreen(
         onNavigateToDisplay()
     }
 
-    // 文件导入
+    // 文件导入 + 导入状态
+    val subtitleSentences by displayViewModel.subtitleSentences.collectAsState()
     val filePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
@@ -162,9 +163,9 @@ fun InputScreen(
             val sentences = com.xiao.wordshow.util.WordParser.parseDocx(context, it)
             if (sentences.isNotEmpty()) {
                 displayViewModel.loadSentences(sentences)
-                Toast.makeText(context, "已导入 ${sentences.size} 句", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "已导入 ${sentences.size} 句，点击进入显示查看", Toast.LENGTH_LONG).show()
             } else {
-                Toast.makeText(context, "文件解析失败", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "文件解析失败，请确认是 .docx 格式", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -208,7 +209,9 @@ fun InputScreen(
                     modifier = Modifier.fillMaxWidth().height(40.dp).shadow(14.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.2f)),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xEEFFFFFF), contentColor = Color(0xFF5B9BD5))
-                ) { Text("📄 导入 Word 文件") }
+                ) {
+                    Text(if (subtitleSentences.isEmpty()) "📄 导入 Word 文件" else "📄 已加载 ${subtitleSentences.size} 句 (点此重新导入)")
+                }
                 Spacer(Modifier.height(8.dp))
             }
 

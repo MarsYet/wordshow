@@ -223,6 +223,8 @@ fun DisplayScreen(
                     onPrev = { displayViewModel.prevSentence() },
                     textColor = contentColor
                 )
+            } else if (!isBoardMode && subtitleSentences.isEmpty()) {
+                Text("暂无字幕数据\n请返回输入页导入 Word 文件", textAlign = TextAlign.Center, color = contentColor.copy(alpha = 0.4f))
             } else if (text.isBlank()) {
                 Text("无显示内容\n请返回输入页输入文字", textAlign = TextAlign.Center, color = contentColor.copy(alpha = 0.4f))
             } else if (isScrolling) {
