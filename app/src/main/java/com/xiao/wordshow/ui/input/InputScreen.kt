@@ -230,12 +230,12 @@ fun InputScreen(
 
             Button(
                 onClick = { navigate() },
-                modifier = Modifier.fillMaxWidth().height(52.dp).shadow(6.dp, RoundedCornerShape(26.dp), spotColor = Color.Black.copy(alpha = 0.3f)),
+                modifier = Modifier.fillMaxWidth().height(52.dp).shadow(4.dp, RoundedCornerShape(26.dp), spotColor = Color(0xFFC8BBA8).copy(alpha = 0.35f)),
                 enabled = text.isNotBlank(),
                 shape = RoundedCornerShape(26.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF8A7D6B), contentColor = Color.White,
-                    disabledContainerColor = Color(0xFFD8CCC0), disabledContentColor = Color(0xFFA09080),
+                    containerColor = Color(0xFFF5EDE3), contentColor = Color(0xFF3E3640),
+                    disabledContainerColor = Color(0xFFF0E8DC), disabledContentColor = Color(0xFFB0A898),
                 )
             ) { Text("进入显示", style = MaterialTheme.typography.titleMedium) }
         }
@@ -280,9 +280,9 @@ private fun MicButton(isRecording: Boolean, onPress: () -> Unit, onRelease: () -
     LaunchedEffect(isPressed) { if (isPressed && !isRecording) onPress() }
     LaunchedEffect(isPressed, isRecording) { if (!isPressed && isRecording) onRelease() }
     val pulseAlpha by if (isRecording) rememberInfiniteTransition(label = "mic").animateFloat(1f, 0.3f, infiniteRepeatable(tween(600), RepeatMode.Reverse), label = "a") else remember { mutableStateOf(1f) }
-    val bg = when { isRecording -> MaterialTheme.colorScheme.errorContainer; isPressed -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f); else -> MaterialTheme.colorScheme.primaryContainer }
-    val fg = when { isRecording -> MaterialTheme.colorScheme.onErrorContainer; else -> MaterialTheme.colorScheme.onPrimaryContainer }
-    Box(modifier.size(56.dp).clip(CircleShape).background(bg).clickable(interactionSource, indication = null, onClick = {}), contentAlignment = Alignment.Center) {
+    val bg = when { isRecording -> Color(0xFFFFE8E0); isPressed -> Color(0xFFF5EDE3); else -> Color(0xFFF5EDE3) }
+    val fg = when { isRecording -> Color(0xFFD84040); else -> Color(0xFF6B5E50) }
+    Box(modifier.size(56.dp).clip(CircleShape).shadow(3.dp, CircleShape, spotColor = Color(0xFFC8BBA8).copy(alpha = 0.35f)).background(bg).clickable(interactionSource, indication = null, onClick = {}), contentAlignment = Alignment.Center) {
         Icon(Icons.Filled.KeyboardVoice, "按住说话", Modifier.size(28.dp).alpha(pulseAlpha), tint = fg)
     }
 }
@@ -345,38 +345,36 @@ fun BoardSubtitleToggle(isBoard: Boolean, onToggle: (Boolean) -> Unit, modifier:
     Box(
         modifier = modifier
             .width(trackWidth).height(thumbSize + trackPadding * 2)
-            .shadow(2.dp, RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.5f))
+            .shadow(3.dp, RoundedCornerShape(20.dp), spotColor = Color(0xFFC8BBA8).copy(alpha = 0.4f))
             .background(
-                Brush.verticalGradient(listOf(Color(0xFF222222), Color(0xFF333333))),
+                Brush.verticalGradient(listOf(Color(0xFFF5EDE0), Color(0xFFE8DDD0))),
                 RoundedCornerShape(20.dp)
             )
-            .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(20.dp))
+            .border(0.5.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
             .clickable { onToggle(!isBoard) },
         contentAlignment = Alignment.CenterStart
     ) {
-        // 轨道内文字
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text("展板", style = MaterialTheme.typography.labelSmall,
-                color = if (isBoard) Color.White else Color.White.copy(alpha = 0.3f))
+                color = if (isBoard) Color(0xFF3E3640) else Color(0xFF3E3640).copy(alpha = 0.3f))
             Text("字幕", style = MaterialTheme.typography.labelSmall,
-                color = if (!isBoard) Color.White else Color.White.copy(alpha = 0.3f))
+                color = if (!isBoard) Color(0xFF3E3640) else Color(0xFF3E3640).copy(alpha = 0.3f))
         }
 
-        // 滑块
         Box(
             Modifier
                 .offset(x = trackPadding + ((thumbOffset * (trackWidth - thumbSize - trackPadding * 2).value).dp))
                 .size(thumbSize)
-                .shadow(2.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.4f))
+                .shadow(4.dp, CircleShape, spotColor = Color(0xFFC8BBA8).copy(alpha = 0.5f))
                 .background(
-                    Brush.verticalGradient(listOf(Color(0xFFEEEEEE), Color(0xFFAAAAAA))),
+                    Brush.verticalGradient(listOf(Color(0xFFFFFBF7), Color(0xFFF0E6D6))),
                     CircleShape
                 )
-                .border(0.5.dp, Color.White.copy(alpha = 0.3f), CircleShape)
+                .border(0.5.dp, Color.White.copy(alpha = 0.6f), CircleShape)
         )
     }
 }
