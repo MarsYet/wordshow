@@ -2,19 +2,13 @@ package com.xiao.wordshow.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// 象牙白珠光调色板
-val IvoryBase  = Color(0xFFFFF8F0)
-val IvoryWarm  = Color(0xFFFFF0E0)
-val IvoryCream = Color(0xFFFFF5E8)
-val IvoryPearl = Color(0xFFFDF5EC)
-val IvoryDark  = Color(0xFFE8DDD0)
-val IvoryDeep  = Color(0xFFC8BBA8)
+// 浅灰透明玻璃调色板
+val GlassBg    = Color(0xFFE8EBED)
+val GlassWhite = Color(0xCCFFFFFF)
+val GlassGray  = Color(0x88E0E4E8)
+val GlassBorder= Color(0x20FFFFFF)
+val GlassShadow= Color(0x18000000)
 
-val PearlWhite = Color(0xFFFAFAF8)
-val PearlGlow  = Color(0xFFFFFBF5)
-val PearlGold  = Color(0xFFF0E6D6)
-
-val WarmText   = Color(0xFF3E3640)
-val WarmGray   = Color(0xFF8A8078)
-val WarmBrown  = Color(0xFF6B5E50)
-val WarmAccent = Color(0xFFC8A96E)
+val TextDark   = Color(0xFF2C3035)
+val TextGray   = Color(0xFF7A8088)
+val AccentBlue = Color(0xFF5B9BD5)

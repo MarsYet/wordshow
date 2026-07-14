@@ -135,14 +135,14 @@ fun DisplayScreen(
 
     val isPhone = remember { adaptive.maxFontSize <= 300f }
     val scope = rememberCoroutineScope()
-    val contentColor = Color(0xFF3E3640)
+    val contentColor = Color(0xFF2C3035)
     val textColor = if (colorIndex == 0) contentColor else com.xiao.wordshow.ui.display.presetTextColors[colorIndex - 1]
     val fontEntry: Pair<FontFamily, FontWeight> = fontOptions[fontIndex]
     val fontFamily: FontFamily = fontEntry.first
     val fontWeight: FontWeight = fontEntry.second
-    val controlBg = Brush.verticalGradient(listOf(Color(0xFFFDF5EC), Color(0xFFF5E8D8), Color(0xFFEDDCC8)))
-    val sliderBg = Brush.verticalGradient(listOf(Color(0xFFFFF8F2), Color(0xFFF0E6D8)))
-    val sliderBorder = Color(0xFFD8C8B0).copy(alpha = 0.4f)
+    val controlBg = Brush.verticalGradient(listOf(Color(0xDDFFFFFF), Color(0xBBF0F2F4), Color(0xAAE0E4E8)))
+    val sliderBg = Brush.verticalGradient(listOf(Color(0xCCFFFFFF), Color(0xAAEEF0F2)))
+    val sliderBorder = Color.White.copy(alpha = 0.5f)
 
     fun doToggleFullscreen() {
         val willBeFullscreen = !isFullscreen
@@ -395,9 +395,9 @@ private fun FontSizeSlider(
                 .weight(1f)
                 .padding(horizontal = 8.dp),
             colors = SliderDefaults.colors(
-                thumbColor = Color(0xFFD8C8B0),
-                activeTrackColor = Color(0xFFB8A088),
-                inactiveTrackColor = Color(0xFFE0D5C5),
+                thumbColor = Color(0xEEFFFFFF),
+                activeTrackColor = Color(0x88A0A8B0),
+                inactiveTrackColor = Color(0x44D0D4D8),
             )
         )
 
@@ -456,9 +456,9 @@ private fun SpeedSlider(
                 .weight(1f)
                 .padding(horizontal = 8.dp),
             colors = SliderDefaults.colors(
-                thumbColor = Color(0xFFD8C8B0),
-                activeTrackColor = Color(0xFFB8A088),
-                inactiveTrackColor = Color(0xFFE0D5C5),
+                thumbColor = Color(0xEEFFFFFF),
+                activeTrackColor = Color(0x88A0A8B0),
+                inactiveTrackColor = Color(0x44D0D4D8),
             )
         )
 
