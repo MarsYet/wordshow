@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import android.widget.Toast
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.xiao.wordshow.data.model.TextEffect
@@ -65,18 +66,20 @@ fun SettingsScreen(
                 Text("默认颜色模式", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(bottom = 12.dp))
                 val modes = listOf("system" to "跟随系统", "dark" to "深色模式", "light" to "浅色模式")
                 modes.forEach { (key, label) ->
-                    Row(
-                        Modifier.fillMaxWidth().clickable {
+                    val sel = colorMode == key
+                    TextButton(
+                        onClick = {
                             displayViewModel.setColorMode(key, systemIsLight)
-                            // DataStore 后台写入，不阻塞 UI
                             kotlinx.coroutines.GlobalScope.launch { try { repo.setColorMode(key) } catch (_: Exception) {} }
-                        }.padding(vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        },
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        if (colorMode == key) Icon(Icons.Filled.Check, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-                        else Spacer(Modifier.size(20.dp))
+                        Icon(Icons.Filled.Check, null,
+                            tint = if (sel) MaterialTheme.colorScheme.primary else Color.Transparent,
+                            modifier = Modifier.size(20.dp))
                         Spacer(Modifier.width(12.dp))
-                        Text(label, style = MaterialTheme.typography.bodyLarge, color = if (colorMode == key) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground)
+                        Text(label, style = MaterialTheme.typography.bodyLarge,
+                            color = if (sel) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground)
                     }
                 }
             }
