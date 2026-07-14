@@ -2,14 +2,19 @@ package com.xiao.wordshow.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// 黑白灰极简调色板
-val Mono0 = Color(0xFF000000)
-val Mono10 = Color(0xFF1A1A1A)
-val Mono15 = Color(0xFF262626)
-val Mono20 = Color(0xFF333333)
-val Mono30 = Color(0xFF4D4D4D)
-val Mono50 = Color(0xFF808080)
-val Mono70 = Color(0xFFB3B3B3)
-val Mono85 = Color(0xFFD9D9D9)
-val Mono95 = Color(0xFFF2F2F2)
-val Mono100 = Color(0xFFFFFFFF)
+// 象牙白珠光调色板
+val IvoryBase  = Color(0xFFFFF8F0)
+val IvoryWarm  = Color(0xFFFFF0E0)
+val IvoryCream = Color(0xFFFFF5E8)
+val IvoryPearl = Color(0xFFFDF5EC)
+val IvoryDark  = Color(0xFFE8DDD0)
+val IvoryDeep  = Color(0xFFC8BBA8)
+
+val PearlWhite = Color(0xFFFAFAF8)
+val PearlGlow  = Color(0xFFFFFBF5)
+val PearlGold  = Color(0xFFF0E6D6)
+
+val WarmText   = Color(0xFF3E3640)
+val WarmGray   = Color(0xFF8A8078)
+val WarmBrown  = Color(0xFF6B5E50)
+val WarmAccent = Color(0xFFC8A96E)

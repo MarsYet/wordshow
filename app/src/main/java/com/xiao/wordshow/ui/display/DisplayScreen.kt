@@ -135,16 +135,14 @@ fun DisplayScreen(
 
     val isPhone = remember { adaptive.maxFontSize <= 300f }
     val scope = rememberCoroutineScope()
-    val contentColor = if (isLightBg) Color.Black else Color.White
+    val contentColor = Color(0xFF3E3640)
     val textColor = if (colorIndex == 0) contentColor else com.xiao.wordshow.ui.display.presetTextColors[colorIndex - 1]
     val fontEntry: Pair<FontFamily, FontWeight> = fontOptions[fontIndex]
     val fontFamily: FontFamily = fontEntry.first
     val fontWeight: FontWeight = fontEntry.second
-    val controlBg = if (isLightBg) Brush.verticalGradient(listOf(Color.White, Color(0xFFF0F0F0), Color(0xFFE0E0E0)))
-                   else Brush.verticalGradient(listOf(Color(0xFF3A3A3A), Color(0xFF2A2A2A), Color(0xFF222222)))
-    val sliderBg = if (isLightBg) Brush.verticalGradient(listOf(Color(0xFFF5F5F5), Color(0xFFE8E8E8)))
-                   else Brush.verticalGradient(listOf(Color(0xFF353535), Color(0xFF282828)))
-    val sliderBorder = if (isLightBg) Color.Black.copy(alpha = 0.06f) else Color.White.copy(alpha = 0.06f)
+    val controlBg = Brush.verticalGradient(listOf(Color(0xFFFDF5EC), Color(0xFFF5E8D8), Color(0xFFEDDCC8)))
+    val sliderBg = Brush.verticalGradient(listOf(Color(0xFFFFF8F2), Color(0xFFF0E6D8)))
+    val sliderBorder = Color(0xFFD8C8B0).copy(alpha = 0.4f)
 
     fun doToggleFullscreen() {
         val willBeFullscreen = !isFullscreen
@@ -397,9 +395,9 @@ private fun FontSizeSlider(
                 .weight(1f)
                 .padding(horizontal = 8.dp),
             colors = SliderDefaults.colors(
-                thumbColor = Color(0xFFE0E0E0),
-                activeTrackColor = Color(0xFFAAAAAA),
-                inactiveTrackColor = Color(0xFF3A3A3A),
+                thumbColor = Color(0xFFD8C8B0),
+                activeTrackColor = Color(0xFFB8A088),
+                inactiveTrackColor = Color(0xFFE0D5C5),
             )
         )
 
@@ -458,9 +456,9 @@ private fun SpeedSlider(
                 .weight(1f)
                 .padding(horizontal = 8.dp),
             colors = SliderDefaults.colors(
-                thumbColor = Color(0xFFE0E0E0),
-                activeTrackColor = Color(0xFFAAAAAA),
-                inactiveTrackColor = Color(0xFF3A3A3A),
+                thumbColor = Color(0xFFD8C8B0),
+                activeTrackColor = Color(0xFFB8A088),
+                inactiveTrackColor = Color(0xFFE0D5C5),
             )
         )
 

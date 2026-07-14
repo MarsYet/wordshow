@@ -234,8 +234,8 @@ fun InputScreen(
                 enabled = text.isNotBlank(),
                 shape = RoundedCornerShape(26.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF3A3A3A), contentColor = Color.White,
-                    disabledContainerColor = Color(0xFF222222), disabledContentColor = Color(0xFF666666),
+                    containerColor = Color(0xFF8A7D6B), contentColor = Color.White,
+                    disabledContainerColor = Color(0xFFD8CCC0), disabledContentColor = Color(0xFFA09080),
                 )
             ) { Text("进入显示", style = MaterialTheme.typography.titleMedium) }
         }
