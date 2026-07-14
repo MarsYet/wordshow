@@ -212,17 +212,19 @@ fun InputScreen(
                 Spacer(Modifier.height(8.dp))
             }
 
-            // 预设短语条
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(vertical = 4.dp)
-            ) {
-                items(presets, key = { it }) { p ->
-                    SuggestionChip(
-                        onClick = { inputViewModel.updateText(p) },
-                        label = { Text(p, style = MaterialTheme.typography.labelMedium) },
-                        shape = RoundedCornerShape(20.dp)
-                    )
+            // 预设短语条（仅展板模式）
+            if (isBoardMode) {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(vertical = 4.dp)
+                ) {
+                    items(presets, key = { it }) { p ->
+                        SuggestionChip(
+                            onClick = { inputViewModel.updateText(p) },
+                            label = { Text(p, style = MaterialTheme.typography.labelMedium) },
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                    }
                 }
             }
 
