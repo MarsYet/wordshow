@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import kotlinx.coroutines.flow.first
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -115,11 +116,7 @@ class HistoryRepository(private val context: Context) {
     }
 
     suspend fun loadPreset(name: String): String? {
-        return context.dataStore.data.map { it[presetKey(name)] }.let { flow ->
-            var result: String? = null
-            flow.collect { result = it }
-            result
-        }
+        return context.dataStore.data.first()[presetKey(name)]
     }
 
     suspend fun deletePreset(name: String) {

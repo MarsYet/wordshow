@@ -9,12 +9,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.xiao.wordshow.data.model.TextEffect
 import com.xiao.wordshow.data.preferences.HistoryRepository
@@ -58,18 +58,16 @@ fun SettingsScreen(
                 Text("默认颜色模式", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(bottom = 12.dp))
                 val modes = listOf("system" to "跟随系统", "dark" to "深色模式", "light" to "浅色模式")
                 modes.forEach { (key, label) ->
-                    Row(Modifier.fillMaxWidth().padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                        RadioButton(
-                            selected = colorMode == key,
-                            onClick = {
-                                scope.launch {
-                                    repo.setColorMode(key)
-                                    displayViewModel.setColorMode(key, systemIsLight)
-                                }
-                            }
-                        )
+                    Row(
+                        Modifier.fillMaxWidth().clickable {
+                            scope.launch { repo.setColorMode(key); displayViewModel.setColorMode(key, systemIsLight) }
+                        }.padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (colorMode == key) Icon(Icons.Filled.Check, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                        else Spacer(Modifier.size(20.dp))
                         Spacer(Modifier.width(12.dp))
-                        Text(label, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground)
+                        Text(label, style = MaterialTheme.typography.bodyLarge, color = if (colorMode == key) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground)
                     }
                 }
             }
