@@ -226,7 +226,11 @@ fun InputScreen(
                 if (!isBoardMode) {
                     // 字幕模式：导入按钮撑满两行高度
                     Button(
-                        onClick = { filePicker.launch(arrayOf("*/*")) },
+                        onClick = { filePicker.launch(arrayOf(
+                            "text/plain",
+                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                            "text/markdown"
+                        )) },
                         modifier = Modifier.fillMaxSize().shadow(14.dp, RoundedCornerShape(16.dp), spotColor = Color.Black.copy(alpha = 0.2f)),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xEEFFFFFF), contentColor = Color(0xFF5B9BD5))
