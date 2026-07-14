@@ -153,14 +153,16 @@ fun DisplayScreen(
 
     val isPhone = remember { adaptive.maxFontSize <= 300f }
     val scope = rememberCoroutineScope()
-    val contentColor = Color(0xFF2C3035)
+    val contentColor = if (isLightBg) Color(0xFF2C3035) else Color.White
     val textColor = if (colorIndex == 0) contentColor else com.xiao.wordshow.ui.display.presetTextColors[colorIndex - 1]
     val fontEntry: Pair<FontFamily, FontWeight> = fontOptions[fontIndex]
     val fontFamily: FontFamily = fontEntry.first
     val fontWeight: FontWeight = fontEntry.second
-    val controlBg = Brush.verticalGradient(listOf(Color(0xDDFFFFFF), Color(0xBBF0F2F4), Color(0xAAE0E4E8)))
-    val sliderBg = Brush.verticalGradient(listOf(Color(0xCCFFFFFF), Color(0xAAEEF0F2)))
-    val sliderBorder = Color.White.copy(alpha = 0.5f)
+    val controlBg = if (isLightBg) Brush.verticalGradient(listOf(Color(0xDDFFFFFF), Color(0xBBF0F2F4), Color(0xAAE0E4E8)))
+                   else Brush.verticalGradient(listOf(Color(0xDD333333), Color(0xBB222222), Color(0xAA111111)))
+    val sliderBg = if (isLightBg) Brush.verticalGradient(listOf(Color(0xCCFFFFFF), Color(0xAAEEF0F2)))
+                   else Brush.verticalGradient(listOf(Color(0xCC333333), Color(0xAA222222)))
+    val sliderBorder = if (isLightBg) Color.White.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.1f)
 
     fun doToggleFullscreen() {
         val willBeFullscreen = !isFullscreen
