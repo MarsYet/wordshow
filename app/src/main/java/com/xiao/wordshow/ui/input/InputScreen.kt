@@ -185,8 +185,9 @@ fun InputScreen(
             // 标题行
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Box {
-                    Text("输入文字", style = MaterialTheme.typography.headlineMedium.copy(drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(3f)), color = Color.White)
-                    Text("输入文字", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
+                    val title = if (isBoardMode) "输入文字" else "字幕播报"
+                    Text(title, style = MaterialTheme.typography.headlineMedium.copy(drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(3f)), color = Color.White)
+                    Text(title, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
                 }
                 Spacer(Modifier.weight(1f))
                 IconButton(onClick = onNavigateToSettings) {
@@ -232,7 +233,7 @@ fun InputScreen(
                 OutlinedTextField(
                     value = text, onValueChange = inputViewModel::updateText,
                     modifier = Modifier.weight(1f),
-                    label = { Text("输入文字...", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                    label = { Text(if (isBoardMode) "输入文字..." else "输入字幕...", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                     maxLines = 5,
                     textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
                     shape = RoundedCornerShape(16.dp),
