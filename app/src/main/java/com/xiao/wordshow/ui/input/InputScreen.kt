@@ -230,7 +230,7 @@ fun InputScreen(
 
             Button(
                 onClick = { navigate() },
-                modifier = Modifier.fillMaxWidth().height(52.dp).shadow(8.dp, RoundedCornerShape(26.dp), spotColor = Color.Black.copy(alpha = 0.22f)),
+                modifier = Modifier.fillMaxWidth().height(52.dp).shadow(10.dp, RoundedCornerShape(26.dp), spotColor = Color.Black.copy(alpha = 0.2f)),
                 enabled = text.isNotBlank(),
                 shape = RoundedCornerShape(26.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -345,7 +345,7 @@ fun BoardSubtitleToggle(isBoard: Boolean, onToggle: (Boolean) -> Unit, modifier:
     Box(
         modifier = modifier
             .width(trackWidth).height(thumbSize + trackPadding * 2)
-            .shadow(7.dp, RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.2f))
+            .shadow(10.dp, RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.2f))
             .background(
                 Brush.verticalGradient(listOf(Color(0xEEFFFFFF), Color(0xCCF0F2F4))),
                 RoundedCornerShape(20.dp)
@@ -369,7 +369,7 @@ fun BoardSubtitleToggle(isBoard: Boolean, onToggle: (Boolean) -> Unit, modifier:
             Modifier
                 .offset(x = trackPadding + ((thumbOffset * (trackWidth - thumbSize - trackPadding * 2).value).dp))
                 .size(thumbSize)
-                .shadow(7.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.22f))
+                .shadow(10.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.2f))
                 .background(
                     Brush.verticalGradient(listOf(Color.White, Color(0xFFF0F2F4))),
                     CircleShape
