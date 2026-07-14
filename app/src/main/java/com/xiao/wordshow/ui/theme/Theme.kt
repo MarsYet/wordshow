@@ -13,29 +13,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = WarmBrown,
-    secondary = WarmGray,
-    tertiary = WarmAccent,
-    background = IvoryDark,
-    surface = IvoryPearl,
-    surfaceVariant = Color(0xFFE8DDD0),
-    onPrimary = Color.White,
-    onBackground = WarmText,
-    onSurface = WarmText,
-    onSurfaceVariant = WarmGray,
+    primary = WarmBrown, secondary = WarmGray, tertiary = WarmAccent,
+    background = IvoryDark, surface = IvoryPearl, surfaceVariant = Color(0xFFE8DDD0),
+    onPrimary = Color.White, onBackground = WarmText, onSurface = WarmText, onSurfaceVariant = WarmGray,
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = WarmBrown,
-    secondary = WarmGray,
-    tertiary = WarmAccent,
-    background = IvoryBase,
-    surface = PearlWhite,
-    surfaceVariant = IvoryWarm,
-    onPrimary = Color.White,
-    onBackground = WarmText,
-    onSurface = WarmText,
-    onSurfaceVariant = WarmGray,
+    primary = WarmBrown, secondary = WarmGray, tertiary = WarmAccent,
+    background = IvoryBase, surface = PearlWhite, surfaceVariant = IvoryWarm,
+    onPrimary = Color.White, onBackground = WarmText, onSurface = WarmText, onSurfaceVariant = WarmGray,
 )
 
 @Composable
