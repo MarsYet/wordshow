@@ -34,6 +34,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -210,29 +212,30 @@ fun InputScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            // 字幕模式 - 导入Word文件 (展板模式保留等高空位防抖动)
-            Box(Modifier.fillMaxWidth().height(40.dp)) {
+            // 导入Word文件 + 预设短语区（统一两行高度，防抖动）
+            Box(Modifier.fillMaxWidth().height(80.dp)) {
                 if (!isBoardMode) {
+                    // 字幕模式：导入按钮占满
                     Button(
                         onClick = { filePicker.launch(arrayOf("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) },
-                        modifier = Modifier.fillMaxWidth().height(40.dp).shadow(14.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.2f)),
-                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxSize().shadow(14.dp, RoundedCornerShape(16.dp), spotColor = Color.Black.copy(alpha = 0.2f)),
+                        shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xEEFFFFFF), contentColor = Color(0xFF5B9BD5))
                     ) {
-                        Text(if (subtitleSentences.isEmpty()) "📄 导入 Word 文件" else "📄 已加载 ${subtitleSentences.size} 句")
+                        Text(
+                            if (subtitleSentences.isEmpty()) "📄 导入 Word 文件" else "📄 已加载 ${subtitleSentences.size} 句，点此重新导入",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
-                }
-            }
-            Spacer(Modifier.height(8.dp))
-
-            // 预设短语条（仅展板模式，字幕模式留等高空位）
-            Box(Modifier.fillMaxWidth().height(36.dp)) {
-                if (isBoardMode) {
-                    LazyRow(
+                } else {
+                    // 展板模式：两行FlowRow预设短语
+                    @OptIn(ExperimentalLayoutApi::class)
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(vertical = 0.dp)
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        items(presets, key = { it }) { p ->
+                        presets.forEach { p ->
                             SuggestionChip(
                                 onClick = { inputViewModel.updateText(p) },
                                 label = { Text(p, style = MaterialTheme.typography.labelMedium) },
