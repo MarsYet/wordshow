@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -21,8 +23,22 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    val keystoreProps = Properties()
+    val keystoreFile = rootProject.file("keystore.properties")
+    if (keystoreFile.exists()) keystoreFile.inputStream().use { keystoreProps.load(it) }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file(keystoreProps.getProperty("storeFile", "kanjian.jks"))
+            storePassword = keystoreProps.getProperty("storePassword", "")
+            keyAlias = keystoreProps.getProperty("keyAlias", "kanjian")
+            keyPassword = keystoreProps.getProperty("keyPassword", "")
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
