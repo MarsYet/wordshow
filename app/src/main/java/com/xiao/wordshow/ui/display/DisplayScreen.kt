@@ -298,7 +298,7 @@ fun DisplayScreen(
                             fontOptions.forEachIndexed { i, pair ->
                                 val fam = pair.first
                                 DropdownMenuItem(
-                                    text = { Text(fontNames[i], fontFamily = fam, color = if (i == fontIndex) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface) },
+                                    text = { Text("${fontNames[i]}  Aa", fontFamily = fam, color = if (i == fontIndex) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface) },
                                     onClick = { displayViewModel.setFont(i); fontMenu = false },
                                     leadingIcon = if (i == fontIndex) { { Icon(Icons.Filled.FormatSize, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)) } } else null
                                 )
