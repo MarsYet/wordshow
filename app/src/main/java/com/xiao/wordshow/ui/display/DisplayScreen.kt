@@ -201,7 +201,9 @@ fun DisplayScreen(
                     onFontSizeChange = displayViewModel::setFontSize,
                     isFullscreen = isFullscreen,
                     range = adaptive.minFontSize..adaptive.maxFontSize,
-                    textColor = contentColor
+                    textColor = contentColor,
+                    sliderBg = sliderBg,
+                    sliderBorder = sliderBorder
                 )
                 if (isScrolling) {
                     SpeedSlider(
@@ -209,7 +211,9 @@ fun DisplayScreen(
                         onSpeedChange = displayViewModel::setScrollSpeed,
                         isFullscreen = isFullscreen,
                         maxSpeed = adaptive.maxScrollSpeed,
-                        textColor = contentColor
+                        textColor = contentColor,
+                        sliderBg = sliderBg,
+                        sliderBorder = sliderBorder
                     )
                 }
                 // 拟物化控制栏 — 凸起面板 + 哑光金属质感
@@ -290,19 +294,18 @@ private fun FontSizeSlider(
     onFontSizeChange: (Float) -> Unit,
     isFullscreen: Boolean,
     range: ClosedFloatingPointRange<Float>,
-    textColor: Color
+    textColor: Color,
+    sliderBg: Brush,
+    sliderBorder: Color
 ) {
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 10.dp)
-            .shadow(3.dp, RoundedCornerShape(12.dp), ambientColor = Color.White.copy(alpha = 0.03f), spotColor = Color.Black.copy(alpha = 0.35f))
-            .background(
-                Brush.verticalGradient(listOf(Color(0xFF353535), Color(0xFF282828))),
-                RoundedCornerShape(12.dp)
-            )
-            .border(0.5.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(12.dp))
+            .shadow(3.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.35f))
+            .background(sliderBg, RoundedCornerShape(12.dp))
+            .border(0.5.dp, sliderBorder, RoundedCornerShape(12.dp))
             .padding(horizontal = 8.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -353,19 +356,18 @@ private fun SpeedSlider(
     onSpeedChange: (Float) -> Unit,
     isFullscreen: Boolean,
     maxSpeed: Float,
-    textColor: Color
+    textColor: Color,
+    sliderBg: Brush,
+    sliderBorder: Color
 ) {
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 10.dp)
-            .shadow(3.dp, RoundedCornerShape(12.dp), ambientColor = Color.White.copy(alpha = 0.03f), spotColor = Color.Black.copy(alpha = 0.35f))
-            .background(
-                Brush.verticalGradient(listOf(Color(0xFF353535), Color(0xFF282828))),
-                RoundedCornerShape(12.dp)
-            )
-            .border(0.5.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(12.dp))
+            .shadow(3.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.35f))
+            .background(sliderBg, RoundedCornerShape(12.dp))
+            .border(0.5.dp, sliderBorder, RoundedCornerShape(12.dp))
             .padding(horizontal = 8.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
