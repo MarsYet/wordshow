@@ -182,20 +182,18 @@ fun InputScreen(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        // 左上角展板/字幕切换
-        BoardSubtitleToggle(
-            isBoard = isBoardMode,
-            onToggle = { displayViewModel.setBoardMode(it) },
-            modifier = Modifier.align(Alignment.TopStart).padding(16.dp)
-        )
-
         Column(
             modifier = Modifier.fillMaxSize().padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // 标题行
+            // 标题行：切换 + 标题 + 图标
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                BoardSubtitleToggle(
+                    isBoard = isBoardMode,
+                    onToggle = { displayViewModel.setBoardMode(it) }
+                )
+                Spacer(Modifier.width(12.dp))
                 Box {
                     val title = if (isBoardMode) "输入文字" else "字幕播报"
                     Text(title, style = MaterialTheme.typography.headlineMedium.copy(drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(3f)), color = Color.White)
@@ -205,7 +203,6 @@ fun InputScreen(
                 IconButton(onClick = onNavigateToSettings) {
                     Icon(Icons.Filled.Folder, "预设配置", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Spacer(Modifier.width(4.dp))
                 IconButton(onClick = { showHistory = true }) {
                     Icon(Icons.AutoMirrored.Filled.List, "历史记录", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
