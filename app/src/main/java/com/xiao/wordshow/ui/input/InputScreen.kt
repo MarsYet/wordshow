@@ -159,7 +159,7 @@ fun InputScreen(
                 .filter { it.isNotBlank() }
             val existing = displayViewModel.subtitleSentences.value
             if (textSentences.isNotEmpty()) {
-                displayViewModel.loadSentences(existing + textSentences)
+                displayViewModel.loadSentences(textSentences + existing)
             }
         }
         onNavigateToDisplay()
