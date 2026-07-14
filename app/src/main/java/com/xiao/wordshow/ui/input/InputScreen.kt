@@ -30,6 +30,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -219,8 +221,8 @@ fun InputScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            // 导入Word文件 + 预设短语区（统一两行高度，防抖动）
-            Box(Modifier.fillMaxWidth().height(80.dp)) {
+            // 导入Word文件 + 预设短语区（可滚动，防溢出）
+            Box(Modifier.fillMaxWidth().height(80.dp).verticalScroll(rememberScrollState())) {
                 if (!isBoardMode) {
                     // 字幕模式：导入按钮占满
                     Button(
