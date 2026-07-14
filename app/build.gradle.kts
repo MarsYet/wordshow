@@ -23,12 +23,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    // 签名配置
     val keystoreProps = Properties()
     val keystoreFile = rootProject.file("keystore.properties")
-    if (keystoreFile.exists()) {
-        keystoreFile.inputStream().use { keystoreProps.load(it) }
-    }
+    if (keystoreFile.exists()) keystoreFile.inputStream().use { keystoreProps.load(it) }
 
     signingConfigs {
         create("release") {
