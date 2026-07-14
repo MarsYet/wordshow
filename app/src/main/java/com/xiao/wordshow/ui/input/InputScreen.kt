@@ -93,10 +93,12 @@ fun InputScreen(
     onNavigateToSettings: () -> Unit = {},
     modifier: Modifier = Modifier,
     inputViewModel: InputViewModel,
+    displayViewModel: com.xiao.wordshow.ui.display.DisplayViewModel,
     adaptive: AdaptiveParams,
     repo: HistoryRepository
 ) {
     val text by inputViewModel.text.collectAsState()
+    val isBoardMode by displayViewModel.isBoardMode.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var isRecording by remember { mutableStateOf(false) }
@@ -152,13 +154,26 @@ fun InputScreen(
         onNavigateToDisplay()
     }
 
-    var isBoardMode by remember { mutableStateOf(true) }
+    // 文件导入
+    val filePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let {
+            val sentences = com.xiao.wordshow.util.WordParser.parseDocx(context, it)
+            if (sentences.isNotEmpty()) {
+                displayViewModel.loadSentences(sentences)
+                Toast.makeText(context, "已导入 ${sentences.size} 句", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "文件解析失败", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
         // 左上角展板/字幕切换
         BoardSubtitleToggle(
             isBoard = isBoardMode,
-            onToggle = { isBoardMode = it },
+            onToggle = { displayViewModel.setBoardMode(it) },
             modifier = Modifier.align(Alignment.TopStart).padding(16.dp)
         )
 
@@ -184,6 +199,17 @@ fun InputScreen(
             }
 
             Spacer(Modifier.height(8.dp))
+
+            // 字幕模式 - 导入Word文件
+            if (!isBoardMode) {
+                Button(
+                    onClick = { filePicker.launch(arrayOf("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) },
+                    modifier = Modifier.fillMaxWidth().height(40.dp).shadow(14.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.2f)),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xEEFFFFFF), contentColor = Color(0xFF5B9BD5))
+                ) { Text("📄 导入 Word 文件") }
+                Spacer(Modifier.height(8.dp))
+            }
 
             // 预设短语条
             LazyRow(

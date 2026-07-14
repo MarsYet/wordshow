@@ -76,6 +76,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.xiao.wordshow.data.model.TextEffect
 import com.xiao.wordshow.ui.display.components.ScrollingText
+import com.xiao.wordshow.ui.display.components.SubtitleDisplay
 import com.xiao.wordshow.ui.display.components.TextEffects
 import com.xiao.wordshow.ui.input.InputViewModel
 import com.xiao.wordshow.util.AdaptiveParams
@@ -119,6 +120,22 @@ fun DisplayScreen(
     val colorMode by displayViewModel.colorMode.collectAsState()
     val resolvedLight = when (colorMode) { "light" -> true; "dark" -> false; else -> systemIsLight }
     LaunchedEffect(resolvedLight) { displayViewModel.setLightBg(resolvedLight) }
+
+    // 字幕模式
+    val isBoardMode by displayViewModel.isBoardMode.collectAsState()
+    val subtitleSentences by displayViewModel.subtitleSentences.collectAsState()
+    val currentIndex by displayViewModel.currentSentenceIndex.collectAsState()
+    val isPlaying by displayViewModel.isSubtitlePlaying.collectAsState()
+
+    // 自动播放字幕
+    LaunchedEffect(isPlaying, currentIndex) {
+        if (!isBoardMode && isPlaying && subtitleSentences.isNotEmpty()) {
+            delay(3000)
+            if (currentIndex < subtitleSentences.lastIndex) {
+                displayViewModel.nextSentence()
+            }
+        }
+    }
 
     val activity = LocalContext.current as ComponentActivity
     // 全屏时控制栏显隐
@@ -196,12 +213,18 @@ fun DisplayScreen(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            if (text.isBlank()) {
-                Text(
-                    text = "无显示内容\n请返回输入页输入文字",
-                    textAlign = TextAlign.Center,
-                    color = contentColor.copy(alpha = 0.4f)
+            if (!isBoardMode && subtitleSentences.isNotEmpty()) {
+                SubtitleDisplay(
+                    sentence = subtitleSentences.getOrElse(currentIndex) { "" },
+                    current = currentIndex + 1, total = subtitleSentences.size,
+                    isPlaying = isPlaying, hasNext = currentIndex < subtitleSentences.lastIndex,
+                    onPlayPause = { displayViewModel.togglePlayPause() },
+                    onNext = { displayViewModel.nextSentence() },
+                    onPrev = { displayViewModel.prevSentence() },
+                    textColor = contentColor
                 )
+            } else if (text.isBlank()) {
+                Text("无显示内容\n请返回输入页输入文字", textAlign = TextAlign.Center, color = contentColor.copy(alpha = 0.4f))
             } else if (isScrolling) {
                 ScrollingText(
                     text = text, fontSize = fontSize.sp,

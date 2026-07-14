@@ -38,6 +38,7 @@ fun AppNavHost() {
                 onNavigateToDisplay = { navController.navigate(Routes.DISPLAY) },
                 onNavigateToSettings = { navController.navigate(Routes.SETTINGS) },
                 inputViewModel = inputViewModel,
+                displayViewModel = displayViewModel,
                 adaptive = adaptive,
                 repo = repo
             )

@@ -92,6 +92,43 @@ class DisplayViewModel : ViewModel() {
         _colorIndex.value = index.coerceIn(0, presetTextColors.size)
     }
 
+    // ---- 字幕模式 ----
+    private val _subtitleSentences = MutableStateFlow<List<String>>(emptyList())
+    val subtitleSentences: StateFlow<List<String>> = _subtitleSentences.asStateFlow()
+
+    private val _currentSentenceIndex = MutableStateFlow(0)
+    val currentSentenceIndex: StateFlow<Int> = _currentSentenceIndex.asStateFlow()
+
+    private val _isSubtitlePlaying = MutableStateFlow(true)
+    val isSubtitlePlaying: StateFlow<Boolean> = _isSubtitlePlaying.asStateFlow()
+
+    fun loadSentences(sentences: List<String>) {
+        _subtitleSentences.value = sentences
+        _currentSentenceIndex.value = 0
+        _isSubtitlePlaying.value = true
+    }
+
+    fun nextSentence() {
+        val max = _subtitleSentences.value.lastIndex
+        if (_currentSentenceIndex.value < max) _currentSentenceIndex.value++
+    }
+
+    fun prevSentence() {
+        if (_currentSentenceIndex.value > 0) _currentSentenceIndex.value--
+    }
+
+    fun togglePlayPause() {
+        _isSubtitlePlaying.value = !_isSubtitlePlaying.value
+    }
+
+    fun setBoardMode(board: Boolean) {
+        _boardMode.value = board
+    }
+
+    // 展板/字幕切换
+    private val _boardMode = MutableStateFlow(true)
+    val isBoardMode: StateFlow<Boolean> = _boardMode.asStateFlow()
+
     // 文字颜色（0=自动跟随背景，1~N=预设色）
     private val _colorIndex = MutableStateFlow(0)
     val colorIndex: StateFlow<Int> = _colorIndex.asStateFlow()
