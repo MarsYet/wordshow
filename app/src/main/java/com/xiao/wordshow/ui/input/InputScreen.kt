@@ -222,7 +222,7 @@ fun InputScreen(
             Spacer(Modifier.height(8.dp))
 
             // 导入Word文件 + 预设短语区（可滚动，防溢出）
-            Box(Modifier.fillMaxWidth().height(80.dp).verticalScroll(rememberScrollState())) {
+            Box(Modifier.fillMaxWidth().height(84.dp).verticalScroll(rememberScrollState()).padding(top = 4.dp)) {
                 if (!isBoardMode) {
                     // 字幕模式：导入按钮撑满两行高度
                     Button(
