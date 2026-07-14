@@ -159,10 +159,10 @@ fun DisplayScreen(
     val fontFamily: FontFamily = fontEntry.first
     val fontWeight: FontWeight = fontEntry.second
     val controlBg = if (isLightBg) Brush.verticalGradient(listOf(Color(0xDDFFFFFF), Color(0xBBF0F2F4), Color(0xAAE0E4E8)))
-                   else Brush.verticalGradient(listOf(Color(0xDD333333), Color(0xBB222222), Color(0xAA111111)))
+                   else Brush.verticalGradient(listOf(Color(0xDD1A1A1A), Color(0xBB111111), Color(0xAA0A0A0A)))
     val sliderBg = if (isLightBg) Brush.verticalGradient(listOf(Color(0xCCFFFFFF), Color(0xAAEEF0F2)))
-                   else Brush.verticalGradient(listOf(Color(0xCC333333), Color(0xAA222222)))
-    val sliderBorder = if (isLightBg) Color.White.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.1f)
+                   else Brush.verticalGradient(listOf(Color(0xCC1A1A1A), Color(0xAA111111)))
+    val sliderBorder = if (isLightBg) Color.White.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.06f)
 
     fun doToggleFullscreen() {
         val willBeFullscreen = !isFullscreen
@@ -190,11 +190,11 @@ fun DisplayScreen(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        // 动态背景
+        // 背景
         if (isLightBg) {
-            Box(Modifier.fillMaxSize().background(Color(0xFFF2F2F2)))
-        } else {
             AnimatedBackground(Modifier.fillMaxSize())
+        } else {
+            Box(Modifier.fillMaxSize().background(Color(0xFF0A0A0A)))
         }
 
         Column(modifier = Modifier.fillMaxSize()) {
