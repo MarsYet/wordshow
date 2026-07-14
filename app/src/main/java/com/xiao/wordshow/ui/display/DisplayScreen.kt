@@ -221,7 +221,8 @@ fun DisplayScreen(
                     onPlayPause = { displayViewModel.togglePlayPause() },
                     onNext = { displayViewModel.nextSentence() },
                     onPrev = { displayViewModel.prevSentence() },
-                    textColor = contentColor
+                    textColor = contentColor,
+                    fontSize = fontSize.sp
                 )
             } else if (!isBoardMode && subtitleSentences.isEmpty()) {
                 Text("暂无字幕数据\n请返回输入页导入 Word 文件", textAlign = TextAlign.Center, color = contentColor.copy(alpha = 0.4f))

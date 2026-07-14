@@ -32,7 +32,8 @@ fun SubtitleDisplay(
     onPlayPause: () -> Unit,
     onNext: () -> Unit,
     onPrev: () -> Unit,
-    textColor: Color
+    textColor: Color,
+    fontSize: androidx.compose.ui.unit.TextUnit = 28.sp
 ) {
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(Modifier.weight(1f))
@@ -46,8 +47,8 @@ fun SubtitleDisplay(
                 .padding(24.dp)
                 .clickable { onNext() }
         ) {
-            Text(sentence, color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(), lineHeight = 40.sp)
+            Text(sentence, color = Color.White, fontSize = fontSize, fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(), lineHeight = fontSize * 1.4f)
         }
 
         Spacer(Modifier.height(16.dp))
