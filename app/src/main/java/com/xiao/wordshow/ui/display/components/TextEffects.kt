@@ -62,7 +62,7 @@ fun EffectText(
                 text = text,
                 fontSize = fontSize,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = Color.Unspecified,
                 lineHeight = (fontSize.value * 1.5f).sp,
                 maxLines = maxLines,
                 softWrap = softWrap,

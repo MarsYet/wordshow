@@ -171,7 +171,7 @@ fun DisplayScreen(
                 Text(
                     text = "无显示内容\n请返回输入页输入文字",
                     textAlign = TextAlign.Center,
-                    color = Color.White.copy(alpha = 0.5f)
+                    color = contentColor.copy(alpha = 0.4f)
                 )
             } else if (isScrolling) {
                 ScrollingText(
@@ -197,14 +197,16 @@ fun DisplayScreen(
                     fontSize = fontSize,
                     onFontSizeChange = displayViewModel::setFontSize,
                     isFullscreen = isFullscreen,
-                    range = adaptive.minFontSize..adaptive.maxFontSize
+                    range = adaptive.minFontSize..adaptive.maxFontSize,
+                    textColor = contentColor
                 )
                 if (isScrolling) {
                     SpeedSlider(
                         speed = scrollSpeed,
                         onSpeedChange = displayViewModel::setScrollSpeed,
                         isFullscreen = isFullscreen,
-                        maxSpeed = adaptive.maxScrollSpeed
+                        maxSpeed = adaptive.maxScrollSpeed,
+                        textColor = contentColor
                     )
                 }
                 // 拟物化控制栏 — 凸起面板 + 哑光金属质感
@@ -227,13 +229,13 @@ fun DisplayScreen(
                         onNavigateBack()
                     }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回",
-                            tint = Color.White)
+                            tint = contentColor)
                     }
                     Spacer(Modifier.weight(1f))
                     Text(
                         if (isScrolling) "滚动中" else "静止",
                         style = MaterialTheme.typography.labelLarge,
-                        color = Color.White.copy(alpha = 0.85f)
+                        color = contentColor.copy(alpha = 0.85f)
                     )
                     IconButton(onClick = { displayViewModel.toggleScrolling() }) {
                         Icon(
@@ -284,9 +286,9 @@ private fun FontSizeSlider(
     fontSize: Float,
     onFontSizeChange: (Float) -> Unit,
     isFullscreen: Boolean,
-    range: ClosedFloatingPointRange<Float>
+    range: ClosedFloatingPointRange<Float>,
+    textColor: Color
 ) {
-    val textColor = Color.White
 
     Row(
         modifier = Modifier
@@ -347,9 +349,9 @@ private fun SpeedSlider(
     speed: Float,
     onSpeedChange: (Float) -> Unit,
     isFullscreen: Boolean,
-    maxSpeed: Float
+    maxSpeed: Float,
+    textColor: Color
 ) {
-    val textColor = Color.White
 
     Row(
         modifier = Modifier
