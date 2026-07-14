@@ -323,7 +323,14 @@ fun InputScreen(
                         Spacer(Modifier.width(8.dp))
                         Button(onClick = {
                             if (newPresetInput.isNotBlank()) {
-                                scope.launch { repo.addPreset(newPresetInput) }
+                                scope.launch {
+                                    try {
+                                        repo.addPreset(newPresetInput)
+                                        Toast.makeText(context, "已添加", Toast.LENGTH_SHORT).show()
+                                    } catch (e: Exception) {
+                                        Toast.makeText(context, "添加失败", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
                                 newPresetInput = ""
                             }
                         }) { Text("添加") }
