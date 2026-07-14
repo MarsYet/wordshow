@@ -112,8 +112,11 @@ fun DisplayScreen(
     val isPhone = remember { adaptive.maxFontSize <= 300f }
     val scope = rememberCoroutineScope()
     val contentColor = if (isLightBg) Color.Black else Color.White
-    val controlBg = if (isLightBg) Brush.verticalGradient(listOf(Color.White, Color(0xFFEEEEEE), Color(0xFFE0E0E0)))
+    val controlBg = if (isLightBg) Brush.verticalGradient(listOf(Color.White, Color(0xFFF0F0F0), Color(0xFFE0E0E0)))
                    else Brush.verticalGradient(listOf(Color(0xFF3A3A3A), Color(0xFF2A2A2A), Color(0xFF222222)))
+    val sliderBg = if (isLightBg) Brush.verticalGradient(listOf(Color(0xFFF5F5F5), Color(0xFFE8E8E8)))
+                   else Brush.verticalGradient(listOf(Color(0xFF353535), Color(0xFF282828)))
+    val sliderBorder = if (isLightBg) Color.Black.copy(alpha = 0.06f) else Color.White.copy(alpha = 0.06f)
 
     fun doToggleFullscreen() {
         val willBeFullscreen = !isFullscreen
