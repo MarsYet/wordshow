@@ -113,7 +113,9 @@ fun InputScreen(
 
     // DataStore 数据
     val history by repo.history.collectAsState(initial = emptyList())
-    val presets by repo.presets.collectAsState(initial = HistoryRepository.DEFAULT_PRESETS.toList())
+    var presets by remember { mutableStateOf(HistoryRepository.DEFAULT_PRESETS.toList()) }
+    // 从DataStore加载并同步
+    LaunchedEffect(Unit) { repo.presets.collect { presets = it } }
 
     // 弹窗状态
     var showHistory by remember { mutableStateOf(false) }
@@ -322,15 +324,10 @@ fun InputScreen(
                         )
                         Spacer(Modifier.width(8.dp))
                         Button(onClick = {
-                            if (newPresetInput.isNotBlank()) {
-                                scope.launch {
-                                    try {
-                                        repo.addPreset(newPresetInput)
-                                        Toast.makeText(context, "已添加", Toast.LENGTH_SHORT).show()
-                                    } catch (e: Exception) {
-                                        Toast.makeText(context, "添加失败", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
+                            val txt = newPresetInput.trim()
+                            if (txt.isNotBlank() && txt !in presets) {
+                                presets = presets + txt
+                                scope.launch { repo.addPreset(txt) }
                                 newPresetInput = ""
                             }
                         }) { Text("添加") }
@@ -340,7 +337,10 @@ fun InputScreen(
                         presets.forEach { p ->
                             Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                                 Text(p, modifier = Modifier.weight(1f))
-                                IconButton(onClick = { scope.launch { repo.removePreset(p) } }) {
+                                IconButton(onClick = {
+                                    presets = presets - p
+                                    scope.launch { repo.removePreset(p) }
+                                }) {
                                     Icon(Icons.Filled.Delete, "删除", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
                                 }
                             }
