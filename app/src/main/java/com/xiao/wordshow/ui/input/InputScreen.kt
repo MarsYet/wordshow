@@ -151,6 +151,17 @@ fun InputScreen(
 
     fun navigate() {
         scope.launch { repo.addHistory(text) }
+        // 字幕模式：将输入文本按句拆分，跟在导入文件后面
+        if (!isBoardMode) {
+            val textSentences = text.replace(Regex("\\s+"), " ")
+                .split(Regex("(?<=[。！？!?\\n])"))
+                .map { it.trim() }
+                .filter { it.isNotBlank() }
+            val existing = displayViewModel.subtitleSentences.value
+            if (textSentences.isNotEmpty()) {
+                displayViewModel.loadSentences(existing + textSentences)
+            }
+        }
         onNavigateToDisplay()
     }
 
