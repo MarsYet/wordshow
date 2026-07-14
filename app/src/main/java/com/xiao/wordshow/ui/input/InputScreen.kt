@@ -210,31 +210,35 @@ fun InputScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            // 字幕模式 - 导入Word文件
-            if (!isBoardMode) {
-                Button(
-                    onClick = { filePicker.launch(arrayOf("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) },
-                    modifier = Modifier.fillMaxWidth().height(40.dp).shadow(14.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.2f)),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xEEFFFFFF), contentColor = Color(0xFF5B9BD5))
-                ) {
-                    Text(if (subtitleSentences.isEmpty()) "📄 导入 Word 文件" else "📄 已加载 ${subtitleSentences.size} 句 (点此重新导入)")
+            // 字幕模式 - 导入Word文件 (展板模式保留等高空位防抖动)
+            Box(Modifier.fillMaxWidth().height(40.dp)) {
+                if (!isBoardMode) {
+                    Button(
+                        onClick = { filePicker.launch(arrayOf("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) },
+                        modifier = Modifier.fillMaxWidth().height(40.dp).shadow(14.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.2f)),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xEEFFFFFF), contentColor = Color(0xFF5B9BD5))
+                    ) {
+                        Text(if (subtitleSentences.isEmpty()) "📄 导入 Word 文件" else "📄 已加载 ${subtitleSentences.size} 句")
+                    }
                 }
-                Spacer(Modifier.height(8.dp))
             }
+            Spacer(Modifier.height(8.dp))
 
-            // 预设短语条（仅展板模式）
-            if (isBoardMode) {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(vertical = 4.dp)
-                ) {
-                    items(presets, key = { it }) { p ->
-                        SuggestionChip(
-                            onClick = { inputViewModel.updateText(p) },
-                            label = { Text(p, style = MaterialTheme.typography.labelMedium) },
-                            shape = RoundedCornerShape(20.dp)
-                        )
+            // 预设短语条（仅展板模式，字幕模式留等高空位）
+            Box(Modifier.fillMaxWidth().height(36.dp)) {
+                if (isBoardMode) {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(vertical = 0.dp)
+                    ) {
+                        items(presets, key = { it }) { p ->
+                            SuggestionChip(
+                                onClick = { inputViewModel.updateText(p) },
+                                label = { Text(p, style = MaterialTheme.typography.labelMedium) },
+                                shape = RoundedCornerShape(20.dp)
+                            )
+                        }
                     }
                 }
             }
