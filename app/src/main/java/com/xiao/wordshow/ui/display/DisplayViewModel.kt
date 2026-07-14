@@ -1,5 +1,8 @@
 package com.xiao.wordshow.ui.display
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.compose.ui.graphics.Color
 import com.xiao.wordshow.data.model.TextEffect
@@ -53,15 +56,15 @@ class DisplayViewModel : ViewModel() {
         _currentEffect.value = effects[nextIndex]
     }
 
-    // 颜色模式
-    private val _colorMode = MutableStateFlow("system")
-    val colorMode: StateFlow<String> = _colorMode.asStateFlow()
+    // 颜色模式 — 用 mutableStateOf 直接观察
+    var colorMode by mutableStateOf("system")
+        private set
 
     private val _isLightBg = MutableStateFlow(true)
     val isLightBg: StateFlow<Boolean> = _isLightBg.asStateFlow()
 
     fun setColorMode(mode: String, isSystemLight: Boolean) {
-        _colorMode.value = mode
+        colorMode = mode
         _isLightBg.value = when (mode) { "light" -> true; "dark" -> false; else -> isSystemLight }
     }
 

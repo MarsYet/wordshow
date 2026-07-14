@@ -116,6 +116,9 @@ fun DisplayScreen(
     LaunchedEffect(Unit) {
         repo.colorMode.collect { mode -> displayViewModel.setColorMode(mode, systemIsLight) }
     }
+    val colorMode = displayViewModel.colorMode
+    val resolvedLight = when (colorMode) { "light" -> true; "dark" -> false; else -> systemIsLight }
+    LaunchedEffect(resolvedLight) { displayViewModel.setLightBg(resolvedLight) }
 
     val activity = LocalContext.current as ComponentActivity
     // 全屏时控制栏显隐

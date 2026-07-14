@@ -31,7 +31,7 @@ fun SettingsScreen(
     displayViewModel: DisplayViewModel
 ) {
     val scope = rememberCoroutineScope()
-    val colorMode by displayViewModel.colorMode.collectAsState()
+    val colorMode = displayViewModel.colorMode // mutableStateOf 直接观察
     val presetNames by repo.presetNames.collectAsState(initial = emptyList())
     // 预设详情缓存
     var presetDetails by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
