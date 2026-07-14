@@ -9,20 +9,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import android.widget.Toast
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.xiao.wordshow.data.model.TextEffect
 import com.xiao.wordshow.data.preferences.HistoryRepository
 import com.xiao.wordshow.ui.display.DisplayViewModel
-import com.xiao.wordshow.ui.display.presetTextColors
 import kotlinx.coroutines.launch
 
 @Composable
@@ -32,8 +27,6 @@ fun SettingsScreen(
     displayViewModel: DisplayViewModel
 ) {
     val scope = rememberCoroutineScope()
-    val colorMode by displayViewModel.colorMode.collectAsState()
-    // 实时收集当前显示配置
     val currentFont by displayViewModel.fontIndex.collectAsState()
     val currentColor by displayViewModel.colorIndex.collectAsState()
     val currentEffect by displayViewModel.currentEffect.collectAsState()
@@ -43,61 +36,32 @@ fun SettingsScreen(
     var presetDetails by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
     LaunchedEffect(presetNames) {
         val map = mutableMapOf<String, String>()
-        for (name in presetNames) {
-            repo.loadPreset(name)?.let { map[name] = it }
-        }
+        for (name in presetNames) repo.loadPreset(name)?.let { map[name] = it }
         presetDetails = map
     }
 
     var showSaveDialog by remember { mutableStateOf(false) }
     var presetNameInput by remember { mutableStateOf("") }
 
-    val systemIsLight = !androidx.compose.foundation.isSystemInDarkTheme()
-
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回", tint = MaterialTheme.colorScheme.onBackground) }
-            Text("设置", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
+            Text("预设配置", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
         }
 
         LazyColumn(Modifier.fillMaxSize().padding(horizontal = 24.dp)) {
-            // 颜色模式
             item {
-                Text("默认颜色模式", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(bottom = 12.dp))
-                val modes = listOf("system" to "跟随系统", "dark" to "深色模式", "light" to "浅色模式")
-                modes.forEach { (key, label) ->
-                    val sel = colorMode == key
-                    TextButton(
-                        onClick = {
-                            displayViewModel.setColorMode(key, systemIsLight)
-                            kotlinx.coroutines.GlobalScope.launch { try { repo.setColorMode(key) } catch (_: Exception) {} }
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(Icons.Filled.Check, null,
-                            tint = if (sel) MaterialTheme.colorScheme.primary else Color.Transparent,
-                            modifier = Modifier.size(20.dp))
-                        Spacer(Modifier.width(12.dp))
-                        Text(label, style = MaterialTheme.typography.bodyLarge,
-                            color = if (sel) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground)
-                    }
-                }
-            }
-
-            // 预设
-            item {
-                Spacer(Modifier.height(24.dp))
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text("预设配置", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
+                    Text("当前配置", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
                     Spacer(Modifier.weight(1f))
-                    // 显示当前配置摘要
-                    val summary = buildConfigSummary(currentFont, currentColor, currentEffect, currentSpeed, currentSize)
-                    Text(summary, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(buildSummary(currentFont, currentColor, currentEffect, currentSpeed, currentSize),
+                        style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.width(8.dp))
                     IconButton(onClick = { showSaveDialog = true }) {
-                        Icon(Icons.Filled.Add, "保存当前配置", tint = MaterialTheme.colorScheme.primary)
+                        Icon(Icons.Filled.Add, "保存为预设", tint = MaterialTheme.colorScheme.primary)
                     }
                 }
+                Spacer(Modifier.height(12.dp))
             }
 
             if (presetNames.isEmpty()) {
@@ -108,8 +72,7 @@ fun SettingsScreen(
                     Card(
                         Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable {
                             scope.launch {
-                                val config = repo.loadPreset(name)
-                                config?.let { applyPreset(it, displayViewModel) }
+                                repo.loadPreset(name)?.let { applyPreset(it, displayViewModel) }
                             }
                         },
                         shape = RoundedCornerShape(12.dp),
@@ -129,19 +92,18 @@ fun SettingsScreen(
                     }
                 }
             }
-
             item { Spacer(Modifier.height(32.dp)) }
         }
     }
 
-    // 保存对话框
     if (showSaveDialog) {
         AlertDialog(
             onDismissRequest = { showSaveDialog = false },
             title = { Text("保存预设") },
             text = {
                 Column {
-                    Text("当前配置：${buildConfigSummary(currentFont, currentColor, currentEffect, currentSpeed, currentSize)}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("当前配置：${buildSummary(currentFont, currentColor, currentEffect, currentSpeed, currentSize)}",
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.height(12.dp))
                     OutlinedTextField(value = presetNameInput, onValueChange = { presetNameInput = it }, label = { Text("预设名称") }, singleLine = true)
                 }
@@ -149,11 +111,7 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(onClick = {
                     if (presetNameInput.isNotBlank()) {
-                        scope.launch {
-                            repo.savePreset(presetNameInput, buildPresetConfig(displayViewModel))
-                            presetNameInput = ""
-                            showSaveDialog = false
-                        }
+                        scope.launch { repo.savePreset(presetNameInput, buildConfig(currentFont, currentColor, currentEffect, currentSpeed, currentSize)); presetNameInput = ""; showSaveDialog = false }
                     }
                 }) { Text("保存") }
             },
@@ -162,30 +120,19 @@ fun SettingsScreen(
     }
 }
 
-private fun buildPresetConfig(vm: DisplayViewModel): String {
-    val f = vm.fontIndex.value
-    val c = vm.colorIndex.value
-    val e = vm.currentEffect.value.ordinal
-    val s = vm.scrollSpeed.value
-    val fs = vm.fontSize.value
-    return "$f,$c,$e,$s,$fs"
-}
-
-private fun buildConfigSummary(font: Int, color: Int, effect: com.xiao.wordshow.data.model.TextEffect, speed: Float, size: Float): String {
+private fun buildConfig(font: Int, color: Int, effect: TextEffect, speed: Float, size: Float) = "$font,$color,${effect.ordinal},$speed,$size"
+private fun buildSummary(font: Int, color: Int, effect: TextEffect, speed: Float, size: Float): String {
     val eff = listOf("无","渐变","阴影","发光","跳动","LED").getOrElse(effect.ordinal) { "无" }
     val clr = if (color == 0) "自动" else listOf("白","黄","红","绿","蓝","橙","紫","青").getOrElse(color - 1) { "自动" }
     return "${size.toInt()}sp · $clr · $eff · ${speed}x"
 }
-
 private fun presetSummary(config: String): String {
-    val p = config.split(",")
-    if (p.size < 5) return config
+    val p = config.split(","); if (p.size < 5) return config
     val font = listOf("默认","默认粗","默认细","衬线","无衬线细","等宽","手写").getOrElse(p[0].toIntOrNull() ?: 0) { "默认" }
     val color = if (p[1] == "0") "自动" else listOf("白","黄","红","绿","蓝","橙","紫","青").getOrElse((p[1].toIntOrNull() ?: 1) - 1) { "?" }
     val effect = listOf("无","渐变","阴影","发光","跳动","LED").getOrElse(p[2].toIntOrNull() ?: 0) { "?" }
     return "$font · $color · $effect · ${p[3]}x · ${p[4]}sp"
 }
-
 private suspend fun applyPreset(config: String, vm: DisplayViewModel) {
     val parts = config.split(",")
     if (parts.size >= 5) {
