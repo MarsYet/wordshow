@@ -263,7 +263,7 @@ fun InputScreen(
             Button(
                 onClick = { navigate() },
                 modifier = Modifier.fillMaxWidth().height(52.dp).shadow(14.dp, RoundedCornerShape(26.dp), spotColor = Color.Black.copy(alpha = 0.2f)),
-                enabled = text.isNotBlank(),
+                enabled = text.isNotBlank() || (!isBoardMode && subtitleSentences.isNotEmpty()),
                 shape = RoundedCornerShape(26.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xDDFFFFFF), contentColor = Color(0xFF2C3035),
