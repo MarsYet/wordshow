@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,13 +48,15 @@ fun EffectText(
     textAlign: TextAlign = TextAlign.Center,
     modifier: Modifier = Modifier,
     onTextLayout: ((androidx.compose.ui.text.TextLayoutResult) -> Unit)? = null,
-    textColor: Color = Color.White
+    textColor: Color = Color.White,
+    fontFamily: FontFamily = FontFamily.Default
 ) {
     // 行距跟随字号等比缩放，防止多行堆叠
     val lineHeightScale = 1.5f
     val baseStyle = TextStyle(
         fontSize = fontSize,
         fontWeight = FontWeight.Bold,
+        fontFamily = fontFamily,
         lineHeight = (fontSize.value * lineHeightScale).sp
     )
 
@@ -194,7 +197,8 @@ fun TextEffects(
     effectType: TextEffect = TextEffect.NONE,
     fontSize: TextUnit = 64.sp,
     modifier: Modifier = Modifier,
-    textColor: Color = Color.White
+    textColor: Color = Color.White,
+    fontFamily: FontFamily = FontFamily.Default
 ) {
     val baseSp = fontSize.value
     // 溢出检测：从目标字号开始，每次溢出缩小 12%，直到不溢出或达下限
@@ -217,6 +221,7 @@ fun TextEffects(
             softWrap = true,
             textAlign = TextAlign.Center,
             textColor = textColor,
+            fontFamily = fontFamily,
             onTextLayout = { result ->
                 if (!settled && result.hasVisualOverflow && effectiveSp > 10f) {
                     effectiveSp = (effectiveSp * 0.82f).coerceAtLeast(10f)

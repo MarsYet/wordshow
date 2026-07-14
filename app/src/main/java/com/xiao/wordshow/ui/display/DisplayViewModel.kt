@@ -1,6 +1,7 @@
 package com.xiao.wordshow.ui.display
 
 import androidx.lifecycle.ViewModel
+import androidx.compose.ui.graphics.Color
 import com.xiao.wordshow.data.model.TextEffect
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -64,4 +65,31 @@ class DisplayViewModel : ViewModel() {
     fun setLightBg(light: Boolean) {
         _isLightBg.value = light
     }
+
+    // 字体选择
+    private val _fontIndex = MutableStateFlow(0)
+    val fontIndex: StateFlow<Int> = _fontIndex.asStateFlow()
+
+    fun cycleFont() {
+        _fontIndex.value = (_fontIndex.value + 1) % 4
+    }
+
+    // 文字颜色（0=自动跟随背景，1~N=预设色）
+    private val _colorIndex = MutableStateFlow(0)
+    val colorIndex: StateFlow<Int> = _colorIndex.asStateFlow()
+
+    fun cycleTextColor() {
+        _colorIndex.value = (_colorIndex.value + 1) % (presetTextColors.size + 1)
+    }
 }
+
+val presetTextColors = listOf(
+    Color(0xFFFFFFFF), // 白
+    Color(0xFFFFD93D), // 黄
+    Color(0xFFFF6B6B), // 红
+    Color(0xFF6BCB77), // 绿
+    Color(0xFF4D96FF), // 蓝
+    Color(0xFFFF9224), // 橙
+    Color(0xFFE040FB), // 紫
+    Color(0xFF00E5FF), // 青
+)

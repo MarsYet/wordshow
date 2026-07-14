@@ -32,6 +32,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.FullscreenExit
+import androidx.compose.material.icons.filled.ColorLens
+import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
@@ -90,6 +92,8 @@ fun DisplayScreen(
     val currentEffect by displayViewModel.currentEffect.collectAsState()
     val scrollSpeed by displayViewModel.scrollSpeed.collectAsState()
     val isLightBg by displayViewModel.isLightBg.collectAsState()
+    val fontIndex by displayViewModel.fontIndex.collectAsState()
+    val colorIndex by displayViewModel.colorIndex.collectAsState()
 
     // 初始化背景模式：先跟系统，再读用户偏好覆盖
     val systemIsLight = !androidx.compose.foundation.isSystemInDarkTheme()
@@ -117,6 +121,13 @@ fun DisplayScreen(
     val isPhone = remember { adaptive.maxFontSize <= 300f }
     val scope = rememberCoroutineScope()
     val contentColor = if (isLightBg) Color.Black else Color.White
+    val textColor = if (colorIndex == 0) contentColor else com.xiao.wordshow.ui.display.presetTextColors[colorIndex - 1]
+    val fontFamily = listOf(
+        androidx.compose.ui.text.font.FontFamily.Default,
+        androidx.compose.ui.text.font.FontFamily.Serif,
+        androidx.compose.ui.text.font.FontFamily.SansSerif,
+        androidx.compose.ui.text.font.FontFamily.Monospace
+    )[fontIndex]
     val controlBg = if (isLightBg) Brush.verticalGradient(listOf(Color.White, Color(0xFFF0F0F0), Color(0xFFE0E0E0)))
                    else Brush.verticalGradient(listOf(Color(0xFF3A3A3A), Color(0xFF2A2A2A), Color(0xFF222222)))
     val sliderBg = if (isLightBg) Brush.verticalGradient(listOf(Color(0xFFF5F5F5), Color(0xFFE8E8E8)))
@@ -185,13 +196,13 @@ fun DisplayScreen(
                 ScrollingText(
                     text = text, fontSize = fontSize.sp,
                     speed = scrollSpeed, effectType = currentEffect,
-                    textColor = contentColor
+                    textColor = textColor, fontFamily = fontFamily
                 )
             } else {
                 TextEffects(
                     text = text, fontSize = fontSize.sp,
                     effectType = currentEffect,
-                    textColor = contentColor
+                    textColor = textColor, fontFamily = fontFamily
                 )
             }
         }
@@ -260,10 +271,17 @@ fun DisplayScreen(
                     }
                     IconButton(onClick = { displayViewModel.cycleEffect() }) {
                         Icon(Icons.Filled.AutoFixHigh, "切换特效",
-                            tint = if (currentEffect != TextEffect.NONE)
-                                if (isFullscreen) Color(0xFFFFD93D) else MaterialTheme.colorScheme.tertiary
-                            else if (isFullscreen) Color.White else MaterialTheme.colorScheme.onSurface
-                        )
+                            tint = if (currentEffect != TextEffect.NONE) Color(0xFFFFD93D) else contentColor)
+                    }
+                    // 字体切换
+                    IconButton(onClick = { displayViewModel.cycleFont() }) {
+                        Icon(Icons.Filled.FormatSize, "切换字体",
+                            tint = if (fontIndex != 0) Color(0xFF4FC3F7) else contentColor)
+                    }
+                    // 文字颜色
+                    IconButton(onClick = { displayViewModel.cycleTextColor() }) {
+                        Icon(Icons.Filled.ColorLens, "文字颜色",
+                            tint = if (colorIndex != 0) textColor else contentColor)
                     }
                     // 浅色/深色背景切换
                     IconButton(onClick = {
