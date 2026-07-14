@@ -31,9 +31,14 @@ fun SettingsScreen(
     displayViewModel: DisplayViewModel
 ) {
     val scope = rememberCoroutineScope()
-    val colorMode = displayViewModel.colorMode // mutableStateOf 直接观察
+    val colorMode = displayViewModel.colorMode
+    // 实时收集当前显示配置
+    val currentFont by displayViewModel.fontIndex.collectAsState()
+    val currentColor by displayViewModel.colorIndex.collectAsState()
+    val currentEffect by displayViewModel.currentEffect.collectAsState()
+    val currentSpeed by displayViewModel.scrollSpeed.collectAsState()
+    val currentSize by displayViewModel.fontSize.collectAsState()
     val presetNames by repo.presetNames.collectAsState(initial = emptyList())
-    // 预设详情缓存
     var presetDetails by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
     LaunchedEffect(presetNames) {
         val map = mutableMapOf<String, String>()
@@ -83,7 +88,7 @@ fun SettingsScreen(
                     Text("预设配置", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
                     Spacer(Modifier.weight(1f))
                     // 显示当前配置摘要
-                    val summary = buildConfigSummary(displayViewModel)
+                    val summary = buildConfigSummary(currentFont, currentColor, currentEffect, currentSpeed, currentSize)
                     Text(summary, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.width(8.dp))
                     IconButton(onClick = { showSaveDialog = true }) {
@@ -133,7 +138,7 @@ fun SettingsScreen(
             title = { Text("保存预设") },
             text = {
                 Column {
-                    Text("当前配置：${buildConfigSummary(displayViewModel)}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("当前配置：${buildConfigSummary(currentFont, currentColor, currentEffect, currentSpeed, currentSize)}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.height(12.dp))
                     OutlinedTextField(value = presetNameInput, onValueChange = { presetNameInput = it }, label = { Text("预设名称") }, singleLine = true)
                 }
@@ -163,10 +168,10 @@ private fun buildPresetConfig(vm: DisplayViewModel): String {
     return "$f,$c,$e,$s,$fs"
 }
 
-private fun buildConfigSummary(vm: DisplayViewModel): String {
-    val eff = vm.currentEffect.value.let { listOf("无","渐变","阴影","发光","跳动","LED").getOrElse(it.ordinal) { "无" } }
-    val clr = if (vm.colorIndex.value == 0) "自动" else listOf("白","黄","红","绿","蓝","橙","紫","青").getOrElse(vm.colorIndex.value - 1) { "自动" }
-    return "${vm.fontSize.value.toInt()}sp · $clr · $eff · ${vm.scrollSpeed.value}x"
+private fun buildConfigSummary(font: Int, color: Int, effect: com.xiao.wordshow.data.model.TextEffect, speed: Float, size: Float): String {
+    val eff = listOf("无","渐变","阴影","发光","跳动","LED").getOrElse(effect.ordinal) { "无" }
+    val clr = if (color == 0) "自动" else listOf("白","黄","红","绿","蓝","橙","紫","青").getOrElse(color - 1) { "自动" }
+    return "${size.toInt()}sp · $clr · $eff · ${speed}x"
 }
 
 private fun presetSummary(config: String): String {
