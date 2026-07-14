@@ -14,9 +14,12 @@ object WordParser {
      */
     fun parseFile(context: Context, uri: Uri): List<String> {
         val mime = context.contentResolver.getType(uri) ?: ""
+        val name = uri.toString().lowercase()
         val text = when {
-            mime.contains("text/plain") || uri.toString().endsWith(".txt") -> parseTxt(context, uri)
-            else -> parseDocx(context, uri)
+            mime.contains("text/plain") || name.endsWith(".txt") || name.endsWith(".md") || name.endsWith(".json") || name.endsWith(".xml") || name.endsWith(".csv") -> parseTxt(context, uri)
+            name.endsWith(".docx") || mime.contains("wordprocessingml") -> parseDocx(context, uri)
+            // 兜底：尝试当纯文本读取
+            else -> parseTxt(context, uri).takeIf { it.isNotBlank() } ?: ""
         }
         return text.replace(Regex("\\s+"), " ")
             .split(Regex("(?<=[。！？!?\\n])"))
