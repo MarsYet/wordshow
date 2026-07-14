@@ -46,7 +46,8 @@ fun EffectText(
     softWrap: Boolean = false,
     textAlign: TextAlign = TextAlign.Center,
     modifier: Modifier = Modifier,
-    onTextLayout: ((androidx.compose.ui.text.TextLayoutResult) -> Unit)? = null
+    onTextLayout: ((androidx.compose.ui.text.TextLayoutResult) -> Unit)? = null,
+    textColor: Color = Color.White
 ) {
     // 行距跟随字号等比缩放，防止多行堆叠
     val lineHeightScale = 1.5f
@@ -62,7 +63,7 @@ fun EffectText(
                 text = text,
                 fontSize = fontSize,
                 fontWeight = FontWeight.Bold,
-                color = Color.Unspecified,
+                color = textColor,
                 lineHeight = (fontSize.value * 1.5f).sp,
                 maxLines = maxLines,
                 softWrap = softWrap,
@@ -192,7 +193,8 @@ fun TextEffects(
     text: String,
     effectType: TextEffect = TextEffect.NONE,
     fontSize: TextUnit = 64.sp,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textColor: Color = Color.White
 ) {
     val baseSp = fontSize.value
     // 溢出检测：从目标字号开始，每次溢出缩小 12%，直到不溢出或达下限
@@ -214,6 +216,7 @@ fun TextEffects(
             maxLines = 30,
             softWrap = true,
             textAlign = TextAlign.Center,
+            textColor = textColor,
             onTextLayout = { result ->
                 if (!settled && result.hasVisualOverflow && effectiveSp > 10f) {
                     effectiveSp = (effectiveSp * 0.82f).coerceAtLeast(10f)

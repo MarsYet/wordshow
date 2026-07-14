@@ -91,8 +91,13 @@ fun DisplayScreen(
     val scrollSpeed by displayViewModel.scrollSpeed.collectAsState()
     val isLightBg by displayViewModel.isLightBg.collectAsState()
 
-    // 加载持久化背景设置
+    // 初始化背景模式：先跟系统，再读用户偏好覆盖
+    val systemIsLight = !androidx.compose.foundation.isSystemInDarkTheme()
     LaunchedEffect(Unit) {
+        if (!displayViewModel.lightBgInited) {
+            displayViewModel.setLightBg(systemIsLight)
+            displayViewModel.lightBgInited = true
+        }
         repo.isLightBackground.collect { displayViewModel.setLightBg(it) }
     }
 
@@ -179,12 +184,14 @@ fun DisplayScreen(
             } else if (isScrolling) {
                 ScrollingText(
                     text = text, fontSize = fontSize.sp,
-                    speed = scrollSpeed, effectType = currentEffect
+                    speed = scrollSpeed, effectType = currentEffect,
+                    textColor = contentColor
                 )
             } else {
                 TextEffects(
                     text = text, fontSize = fontSize.sp,
-                    effectType = currentEffect
+                    effectType = currentEffect,
+                    textColor = contentColor
                 )
             }
         }

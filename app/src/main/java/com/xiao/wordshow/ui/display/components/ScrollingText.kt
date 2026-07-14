@@ -18,6 +18,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
@@ -36,7 +37,8 @@ fun ScrollingText(
     speed: Float = 1f,
     fontSize: TextUnit = 64.sp,
     effectType: TextEffect = TextEffect.NONE,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textColor: Color = Color.White
 ) {
     BoxWithConstraints(modifier = modifier) {
         val containerWidthPx = constraints.maxWidth.toFloat()
@@ -102,6 +104,7 @@ fun ScrollingText(
                 maxLines = 1,
                 softWrap = false,
                 textAlign = TextAlign.Left,
+                textColor = textColor,
                 modifier = Modifier
                     .wrapContentWidth(unbounded = true)
                     .onSizeChanged { textWidthPx = it.width.toFloat() }
