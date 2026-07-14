@@ -250,6 +250,23 @@ fun DisplayScreen(
             exit = fadeOut()
         ) {
             Column {
+                // 字幕模式：简化操控栏
+                if (!isBoardMode && subtitleSentences.isNotEmpty()) {
+                    Row(
+                        Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp)
+                            .shadow(14.dp, RoundedCornerShape(18.dp), spotColor = Color.Black.copy(alpha = 0.2f))
+                            .background(controlBg, RoundedCornerShape(18.dp)).border(0.5.dp, sliderBorder, RoundedCornerShape(18.dp))
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        Arrangement.SpaceEvenly, Alignment.CenterVertically
+                    ) {
+                        IconButton(onClick = { if (isFullscreen) doToggleFullscreen(); onNavigateBack() }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回", tint = contentColor) }
+                        IconButton(onClick = { displayViewModel.prevSentence() }) { Text("⏮", fontSize = 22.sp) }
+                        Text("${currentIndex + 1}/${subtitleSentences.size}", style = MaterialTheme.typography.titleSmall, color = contentColor)
+                        IconButton(onClick = { displayViewModel.togglePlayPause() }) { Text(if (isPlaying) "⏸" else "▶", fontSize = 22.sp) }
+                        IconButton(onClick = { displayViewModel.nextSentence() }) { Text("⏭", fontSize = 22.sp) }
+                    }
+                } else {
+                // 展板模式：完整控制
                 FontSizeSlider(
                     fontSize = fontSize,
                     onFontSizeChange = displayViewModel::setFontSize,
@@ -376,6 +393,7 @@ fun DisplayScreen(
                         )
                     }
                 }
+                } // else (board mode controls)
             }
         }
         }
