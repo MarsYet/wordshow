@@ -182,12 +182,12 @@ fun InputScreen(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
         uri?.let {
-            val sentences = com.xiao.wordshow.util.WordParser.parseDocx(context, it)
+            val sentences = com.xiao.wordshow.util.WordParser.parseFile(context, it)
             if (sentences.isNotEmpty()) {
                 displayViewModel.loadSentences(sentences)
-                Toast.makeText(context, "已导入 ${sentences.size} 句，点击进入显示查看", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "已导入 ${sentences.size} 句", Toast.LENGTH_LONG).show()
             } else {
-                Toast.makeText(context, "文件解析失败，请确认是 .docx 格式", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "文件解析失败，请确认是 .docx 或 .txt 格式", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -226,7 +226,7 @@ fun InputScreen(
                 if (!isBoardMode) {
                     // 字幕模式：导入按钮撑满两行高度
                     Button(
-                        onClick = { filePicker.launch(arrayOf("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) },
+                        onClick = { filePicker.launch(arrayOf("application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain")) },
                         modifier = Modifier.fillMaxSize().shadow(14.dp, RoundedCornerShape(16.dp), spotColor = Color.Black.copy(alpha = 0.2f)),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xEEFFFFFF), contentColor = Color(0xFF5B9BD5))
@@ -234,7 +234,7 @@ fun InputScreen(
                         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                             Text("📄", style = MaterialTheme.typography.headlineSmall)
                             Text(
-                                if (subtitleSentences.isEmpty()) "导入 Word 文件" else "已加载 ${subtitleSentences.size} 句，点此重新导入",
+                                if (subtitleSentences.isEmpty()) "导入 Word / TXT 文件" else "已加载 ${subtitleSentences.size} 句，点此重新导入",
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }

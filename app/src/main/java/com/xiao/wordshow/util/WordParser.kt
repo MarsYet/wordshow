@@ -10,9 +10,30 @@ import java.util.zip.ZipFile
 object WordParser {
 
     /**
-     * 从 docx 文件提取纯文本，按句号/问号/感叹号/换行拆分为句子列表
+     * 解析文件（兼容 .docx / .txt），按句号/问号/感叹号/换行拆分为句子列表
      */
-    fun parseDocx(context: Context, uri: Uri): List<String> {
+    fun parseFile(context: Context, uri: Uri): List<String> {
+        val mime = context.contentResolver.getType(uri) ?: ""
+        val text = when {
+            mime.contains("text/plain") || uri.toString().endsWith(".txt") -> parseTxt(context, uri)
+            else -> parseDocx(context, uri)
+        }
+        return text.replace(Regex("\\s+"), " ")
+            .split(Regex("(?<=[。！？!?\\n])"))
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+    }
+
+    private fun parseTxt(context: Context, uri: Uri): String {
+        return try {
+            context.contentResolver.openInputStream(uri)?.bufferedReader()?.readText() ?: ""
+        } catch (e: Exception) { "" }
+    }
+
+    /**
+     * 从 docx 文件提取纯文本
+     */
+    private fun parseDocx(context: Context, uri: Uri): String {
         val text = StringBuilder()
         try {
             context.contentResolver.openInputStream(uri)?.use { input ->
@@ -38,14 +59,9 @@ object WordParser {
                 }
             }
         } catch (e: Exception) {
-            return emptyList()
+            return ""
         }
 
-        // 拆分为句子
         return text.toString()
-            .replace(Regex("\\s+"), " ")
-            .split(Regex("(?<=[。！？!?\\n])"))
-            .map { it.trim() }
-            .filter { it.isNotBlank() }
     }
 }
