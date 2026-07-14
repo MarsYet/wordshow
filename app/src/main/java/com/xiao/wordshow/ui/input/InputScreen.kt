@@ -224,17 +224,20 @@ fun InputScreen(
             // 导入Word文件 + 预设短语区（可滚动，防溢出）
             Box(Modifier.fillMaxWidth().height(80.dp).verticalScroll(rememberScrollState())) {
                 if (!isBoardMode) {
-                    // 字幕模式：导入按钮占满
+                    // 字幕模式：导入按钮撑满两行高度
                     Button(
                         onClick = { filePicker.launch(arrayOf("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) },
                         modifier = Modifier.fillMaxSize().shadow(14.dp, RoundedCornerShape(16.dp), spotColor = Color.Black.copy(alpha = 0.2f)),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xEEFFFFFF), contentColor = Color(0xFF5B9BD5))
                     ) {
-                        Text(
-                            if (subtitleSentences.isEmpty()) "📄 导入 Word 文件" else "📄 已加载 ${subtitleSentences.size} 句，点此重新导入",
-                            style = MaterialTheme.typography.bodyLarge
-                        )
+                        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                            Text("📄", style = MaterialTheme.typography.headlineSmall)
+                            Text(
+                                if (subtitleSentences.isEmpty()) "导入 Word 文件" else "已加载 ${subtitleSentences.size} 句，点此重新导入",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
                     }
                 } else {
                     // 展板模式：两行FlowRow预设短语 + 添加按钮
