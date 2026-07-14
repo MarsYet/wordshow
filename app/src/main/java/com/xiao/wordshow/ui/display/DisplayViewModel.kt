@@ -70,8 +70,12 @@ class DisplayViewModel : ViewModel() {
     private val _fontIndex = MutableStateFlow(0)
     val fontIndex: StateFlow<Int> = _fontIndex.asStateFlow()
 
-    fun cycleFont() {
-        _fontIndex.value = (_fontIndex.value + 1) % 4
+    fun setFont(index: Int) {
+        _fontIndex.value = index.coerceIn(0, 4)
+    }
+
+    fun setColor(index: Int) {
+        _colorIndex.value = index.coerceIn(0, presetTextColors.size)
     }
 
     // 文字颜色（0=自动跟随背景，1~N=预设色）
@@ -93,3 +97,5 @@ val presetTextColors = listOf(
     Color(0xFFE040FB), // 紫
     Color(0xFF00E5FF), // 青
 )
+
+val colorNames = listOf("白", "黄", "红", "绿", "蓝", "橙", "紫", "青")

@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -39,6 +40,8 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.TextDecrease
 import androidx.compose.material.icons.filled.TextIncrease
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -62,6 +65,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
@@ -123,10 +127,8 @@ fun DisplayScreen(
     val contentColor = if (isLightBg) Color.Black else Color.White
     val textColor = if (colorIndex == 0) contentColor else com.xiao.wordshow.ui.display.presetTextColors[colorIndex - 1]
     val fontFamily = listOf(
-        androidx.compose.ui.text.font.FontFamily.Default,
-        androidx.compose.ui.text.font.FontFamily.Serif,
-        androidx.compose.ui.text.font.FontFamily.SansSerif,
-        androidx.compose.ui.text.font.FontFamily.Monospace
+        FontFamily.Default, FontFamily.Serif, FontFamily.SansSerif,
+        FontFamily.Monospace, FontFamily.Cursive
     )[fontIndex]
     val controlBg = if (isLightBg) Brush.verticalGradient(listOf(Color.White, Color(0xFFF0F0F0), Color(0xFFE0E0E0)))
                    else Brush.verticalGradient(listOf(Color(0xFF3A3A3A), Color(0xFF2A2A2A), Color(0xFF222222)))
@@ -273,15 +275,52 @@ fun DisplayScreen(
                         Icon(Icons.Filled.AutoFixHigh, "切换特效",
                             tint = if (currentEffect != TextEffect.NONE) Color(0xFFFFD93D) else contentColor)
                     }
-                    // 字体切换
-                    IconButton(onClick = { displayViewModel.cycleFont() }) {
-                        Icon(Icons.Filled.FormatSize, "切换字体",
-                            tint = if (fontIndex != 0) Color(0xFF4FC3F7) else contentColor)
+                    // 字体选择(弹出)
+                    Box {
+                        var fontMenu by remember { mutableStateOf(false) }
+                        IconButton(onClick = { fontMenu = true }) {
+                            Icon(Icons.Filled.FormatSize, "字体",
+                                tint = if (fontIndex != 0) Color(0xFF4FC3F7) else contentColor)
+                        }
+                        DropdownMenu(expanded = fontMenu, onDismissRequest = { fontMenu = false },
+                            offset = androidx.compose.ui.unit.DpOffset(0.dp, (-320).dp)) {
+                            val fonts = listOf("默认", "衬线", "无衬线", "等宽", "手写")
+                            val fontFamilies = listOf(FontFamily.Default, FontFamily.Serif, FontFamily.SansSerif, FontFamily.Monospace, FontFamily.Cursive)
+                            fonts.forEachIndexed { i, name ->
+                                DropdownMenuItem(
+                                    text = { Text(name, fontFamily = fontFamilies[i], color = if (i == fontIndex) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface) },
+                                    onClick = { displayViewModel.setFont(i); fontMenu = false },
+                                    leadingIcon = if (i == fontIndex) { { Icon(Icons.Filled.FormatSize, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)) } } else null
+                                )
+                            }
+                        }
                     }
-                    // 文字颜色
-                    IconButton(onClick = { displayViewModel.cycleTextColor() }) {
-                        Icon(Icons.Filled.ColorLens, "文字颜色",
-                            tint = if (colorIndex != 0) textColor else contentColor)
+                    // 文字颜色(弹出)
+                    Box {
+                        var colorMenu by remember { mutableStateOf(false) }
+                        IconButton(onClick = { colorMenu = true }) {
+                            Icon(Icons.Filled.ColorLens, "颜色",
+                                tint = if (colorIndex != 0) textColor else contentColor)
+                        }
+                        DropdownMenu(expanded = colorMenu, onDismissRequest = { colorMenu = false },
+                            offset = androidx.compose.ui.unit.DpOffset(0.dp, (-400).dp)) {
+                            // 自动选项
+                            DropdownMenuItem(
+                                text = { Text("自动（跟背景）", color = if (colorIndex == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface) },
+                                onClick = { displayViewModel.setColor(0); colorMenu = false },
+                                leadingIcon = {
+                                    Box(Modifier.size(20.dp).background(contentColor, CircleShape).border(1.dp, MaterialTheme.colorScheme.onSurface.copy(0.3f), CircleShape))
+                                }
+                            )
+                            // 预设颜色
+                            presetTextColors.forEachIndexed { i, c ->
+                                DropdownMenuItem(
+                                    text = { Text(colorNames[i], color = if (colorIndex == i + 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface) },
+                                    onClick = { displayViewModel.setColor(i + 1); colorMenu = false },
+                                    leadingIcon = { Box(Modifier.size(20.dp).background(c, CircleShape).border(1.dp, Color.White.copy(0.3f), CircleShape)) }
+                                )
+                            }
+                        }
                     }
                     // 浅色/深色背景切换
                     IconButton(onClick = {
