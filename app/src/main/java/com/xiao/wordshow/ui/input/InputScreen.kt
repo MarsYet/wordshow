@@ -338,47 +338,45 @@ private fun ShortArrayToByteArray(shorts: ShortArray, len: Int): ByteArray {
 fun BoardSubtitleToggle(isBoard: Boolean, onToggle: (Boolean) -> Unit, modifier: Modifier = Modifier) {
     val thumbOffset by animateFloatAsState(if (isBoard) 0f else 1f, animationSpec = tween(300), label = "toggle")
 
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        // 滑轨 + 滑块
-        Box(
-            Modifier
-                .width(72.dp).height(36.dp)
-                .shadow(2.dp, RoundedCornerShape(18.dp), spotColor = Color.Black.copy(alpha = 0.5f))
-                .background(
-                    Brush.verticalGradient(listOf(Color(0xFF2A2A2A), Color(0xFF3A3A3A))),
-                    RoundedCornerShape(18.dp)
-                )
-                .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(18.dp))
-                .clickable { onToggle(!isBoard) },
-            contentAlignment = Alignment.CenterStart
-        ) {
-            // 滑块
-            Box(
-                Modifier
-                    .offset(x = (thumbOffset * 36).dp)
-                    .size(32.dp).padding(2.dp)
-                    .shadow(2.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.4f))
-                    .background(
-                        Brush.verticalGradient(listOf(Color(0xFFDDDDDD), Color(0xFF999999))),
-                        CircleShape
-                    )
-                    .border(0.5.dp, Color.White.copy(alpha = 0.3f), CircleShape)
+    val trackWidth = 96.dp
+    val thumbSize = 36.dp
+    val trackPadding = 2.dp
+
+    Box(
+        modifier = modifier
+            .width(trackWidth).height(thumbSize + trackPadding * 2)
+            .shadow(2.dp, RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.5f))
+            .background(
+                Brush.verticalGradient(listOf(Color(0xFF222222), Color(0xFF333333))),
+                RoundedCornerShape(20.dp)
             )
-            // 轨道文字
-            Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                Spacer(Modifier.size(32.dp))
-                Spacer(Modifier.size(32.dp))
-            }
-        }
-
-        Spacer(Modifier.height(4.dp))
-
-        // 底部双标签
-        Row(Modifier.width(72.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+            .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(20.dp))
+            .clickable { onToggle(!isBoard) },
+        contentAlignment = Alignment.CenterStart
+    ) {
+        // 轨道内文字
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text("展板", style = MaterialTheme.typography.labelSmall,
                 color = if (isBoard) Color.White else Color.White.copy(alpha = 0.3f))
             Text("字幕", style = MaterialTheme.typography.labelSmall,
                 color = if (!isBoard) Color.White else Color.White.copy(alpha = 0.3f))
         }
+
+        // 滑块
+        Box(
+            Modifier
+                .offset(x = trackPadding + ((thumbOffset * (trackWidth - thumbSize - trackPadding * 2).value).dp))
+                .size(thumbSize)
+                .shadow(2.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.4f))
+                .background(
+                    Brush.verticalGradient(listOf(Color(0xFFEEEEEE), Color(0xFFAAAAAA))),
+                    CircleShape
+                )
+                .border(0.5.dp, Color.White.copy(alpha = 0.3f), CircleShape)
+        )
     }
 }
