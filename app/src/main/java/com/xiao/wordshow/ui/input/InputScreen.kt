@@ -11,10 +11,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -65,7 +67,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -148,7 +152,16 @@ fun InputScreen(
         onNavigateToDisplay()
     }
 
+    var isBoardMode by remember { mutableStateOf(true) }
+
     Box(modifier = modifier.fillMaxSize()) {
+        // 左上角展板/字幕切换
+        BoardSubtitleToggle(
+            isBoard = isBoardMode,
+            onToggle = { isBoardMode = it },
+            modifier = Modifier.align(Alignment.TopStart).padding(16.dp)
+        )
+
         Column(
             modifier = Modifier.fillMaxSize().padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -317,4 +330,55 @@ private fun buildAudioRecorder(scope: kotlinx.coroutines.CoroutineScope, onAmpli
 
 private fun ShortArrayToByteArray(shorts: ShortArray, len: Int): ByteArray {
     val bytes = ByteArray(len * 2); for (i in 0 until len) { val v = shorts[i].toInt(); bytes[i * 2] = (v and 0xFF).toByte(); bytes[i * 2 + 1] = ((v shr 8) and 0xFF).toByte() }; return bytes
+}
+
+// ---------- 展板/字幕 拟物滑块 ----------
+
+@Composable
+fun BoardSubtitleToggle(isBoard: Boolean, onToggle: (Boolean) -> Unit, modifier: Modifier = Modifier) {
+    val thumbOffset by animateFloatAsState(if (isBoard) 0f else 1f, animationSpec = tween(300), label = "toggle")
+
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        // 滑轨 + 滑块
+        Box(
+            Modifier
+                .width(72.dp).height(36.dp)
+                .shadow(2.dp, RoundedCornerShape(18.dp), spotColor = Color.Black.copy(alpha = 0.5f))
+                .background(
+                    Brush.verticalGradient(listOf(Color(0xFF2A2A2A), Color(0xFF3A3A3A))),
+                    RoundedCornerShape(18.dp)
+                )
+                .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(18.dp))
+                .clickable { onToggle(!isBoard) },
+            contentAlignment = Alignment.CenterStart
+        ) {
+            // 滑块
+            Box(
+                Modifier
+                    .offset(x = (thumbOffset * 36).dp)
+                    .size(32.dp).padding(2.dp)
+                    .shadow(2.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.4f))
+                    .background(
+                        Brush.verticalGradient(listOf(Color(0xFFDDDDDD), Color(0xFF999999))),
+                        CircleShape
+                    )
+                    .border(0.5.dp, Color.White.copy(alpha = 0.3f), CircleShape)
+            )
+            // 轨道文字
+            Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                Spacer(Modifier.size(32.dp))
+                Spacer(Modifier.size(32.dp))
+            }
+        }
+
+        Spacer(Modifier.height(4.dp))
+
+        // 底部双标签
+        Row(Modifier.width(72.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("展板", style = MaterialTheme.typography.labelSmall,
+                color = if (isBoard) Color.White else Color.White.copy(alpha = 0.3f))
+            Text("字幕", style = MaterialTheme.typography.labelSmall,
+                color = if (!isBoard) Color.White else Color.White.copy(alpha = 0.3f))
+        }
+    }
 }
