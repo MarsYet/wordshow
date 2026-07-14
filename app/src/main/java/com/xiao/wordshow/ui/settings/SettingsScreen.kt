@@ -29,12 +29,7 @@ fun SettingsScreen(
     displayViewModel: DisplayViewModel
 ) {
     val scope = rememberCoroutineScope()
-    val colorModeFromRepo by repo.colorMode.collectAsState(initial = "system")
-    var selectedColorMode by remember { mutableStateOf(colorModeFromRepo) }
-
-    // 同步 DataStore 变化到本地状态
-    LaunchedEffect(colorModeFromRepo) { selectedColorMode = colorModeFromRepo }
-
+    val colorMode by displayViewModel.colorMode.collectAsState()
     val presetNames by repo.presetNames.collectAsState(initial = emptyList())
     // 预设详情缓存
     var presetDetails by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
@@ -49,13 +44,7 @@ fun SettingsScreen(
     var showSaveDialog by remember { mutableStateOf(false) }
     var presetNameInput by remember { mutableStateOf("") }
 
-    // 立即应用颜色模式
-    fun applyColorMode(mode: String) {
-        selectedColorMode = mode
-        scope.launch { repo.setColorMode(mode) }
-        val light = when (mode) { "light" -> true; "dark" -> false; else -> true }
-        displayViewModel.setLightBg(light)
-    }
+    val systemIsLight = !androidx.compose.foundation.isSystemInDarkTheme()
 
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -69,8 +58,16 @@ fun SettingsScreen(
                 Text("默认颜色模式", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(bottom = 12.dp))
                 val modes = listOf("system" to "跟随系统", "dark" to "深色模式", "light" to "浅色模式")
                 modes.forEach { (key, label) ->
-                    Row(Modifier.fillMaxWidth().clickable { applyColorMode(key) }.padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                        RadioButton(selected = selectedColorMode == key, onClick = { applyColorMode(key) })
+                    Row(Modifier.fillMaxWidth().padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(
+                            selected = colorMode == key,
+                            onClick = {
+                                scope.launch {
+                                    repo.setColorMode(key)
+                                    displayViewModel.setColorMode(key, systemIsLight)
+                                }
+                            }
+                        )
                         Spacer(Modifier.width(12.dp))
                         Text(label, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground)
                     }

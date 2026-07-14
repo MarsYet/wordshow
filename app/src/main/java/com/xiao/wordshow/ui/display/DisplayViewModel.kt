@@ -53,10 +53,17 @@ class DisplayViewModel : ViewModel() {
         _currentEffect.value = effects[nextIndex]
     }
 
-    // 浅色背景：默认跟随系统（深色系统=暗底白字，浅色系统=亮底黑字）
-    private val _isLightBg = MutableStateFlow(true) // default light until system check
+    // 颜色模式
+    private val _colorMode = MutableStateFlow("system")
+    val colorMode: StateFlow<String> = _colorMode.asStateFlow()
+
+    private val _isLightBg = MutableStateFlow(true)
     val isLightBg: StateFlow<Boolean> = _isLightBg.asStateFlow()
-    var lightBgInited = false
+
+    fun setColorMode(mode: String, isSystemLight: Boolean) {
+        _colorMode.value = mode
+        _isLightBg.value = when (mode) { "light" -> true; "dark" -> false; else -> isSystemLight }
+    }
 
     fun toggleLightBg() {
         _isLightBg.value = !_isLightBg.value
