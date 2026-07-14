@@ -4,18 +4,19 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- 圆角展示板 -->
     <path
-        android:fillColor="#2C3035"
-        android:pathData="M22,24 L86,24 Q96,24 96,34 L96,80 Q96,90 86,90 L22,90 Q12,90 12,80 L12,34 Q12,24 22,24Z" />
-    <!-- 三行白色文字 -->
-    <path android:strokeColor="#FFFFFF" android:strokeWidth="4.5" android:strokeLineCap="round"
-        android:pathData="M30,44 L78,44" />
-    <path android:strokeColor="#FFFFFF" android:strokeWidth="4.5" android:strokeLineCap="round"
-        android:pathData="M30,56 L64,56" />
-    <path android:strokeColor="#FFFFFF" android:strokeWidth="4.5" android:strokeLineCap="round"
-        android:pathData="M30,68 L72,68" />
-    <!-- 顶部高光条 -->
-    <path android:fillColor="#40FFFFFF"
-        android:pathData="M22,24 L86,24 Q96,24 96,34 L96,40 L22,40Z" />
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:pathData="M22,44 L86,44" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:pathData="M28,54 L80,54" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:pathData="M34,64 L74,64" />
 </vector>
