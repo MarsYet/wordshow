@@ -112,14 +112,13 @@ fun DisplayScreen(
     val fontIndex by displayViewModel.fontIndex.collectAsState()
     val colorIndex by displayViewModel.colorIndex.collectAsState()
 
-    // 初始化颜色模式：从 DataStore 加载到 ViewModel
+    // 初始化背景：加载持久化偏好，之后手动切换
     val systemIsLight = !androidx.compose.foundation.isSystemInDarkTheme()
     LaunchedEffect(Unit) {
-        repo.colorMode.collect { mode -> displayViewModel.setColorMode(mode, systemIsLight) }
+        repo.isLightBackground.collect { saved ->
+            displayViewModel.setLightBg(saved ?: systemIsLight)
+        }
     }
-    val colorMode by displayViewModel.colorMode.collectAsState()
-    val resolvedLight = when (colorMode) { "light" -> true; "dark" -> false; else -> systemIsLight }
-    LaunchedEffect(resolvedLight) { displayViewModel.setLightBg(resolvedLight) }
 
     // 字幕模式
     val isBoardMode by displayViewModel.isBoardMode.collectAsState()

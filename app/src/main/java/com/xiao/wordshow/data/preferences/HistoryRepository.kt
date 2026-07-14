@@ -81,8 +81,8 @@ class HistoryRepository(private val context: Context) {
     }
 
     // 深浅背景
-    val isLightBackground: Flow<Boolean> = context.dataStore.data.map { prefs ->
-        prefs[KEY_LIGHT_BG] ?: false
+    val isLightBackground: Flow<Boolean?> = context.dataStore.data.map { prefs ->
+        prefs[KEY_LIGHT_BG]
     }
 
     suspend fun setLightBackground(light: Boolean) {
