@@ -268,6 +268,9 @@ fun DisplayScreen(
                         Text("${currentIndex + 1}/${subtitleSentences.size}", style = MaterialTheme.typography.titleSmall, color = contentColor)
                         IconButton(onClick = { displayViewModel.togglePlayPause() }) { Text(if (isPlaying) "⏸" else "▶", fontSize = 22.sp) }
                         IconButton(onClick = { displayViewModel.nextSentence() }) { Text("⏭", fontSize = 22.sp) }
+                        IconButton(onClick = { showControls = true; doToggleFullscreen() }) {
+                            Icon(if (isFullscreen) Icons.Filled.FullscreenExit else Icons.Filled.Fullscreen, "全屏", tint = contentColor)
+                        }
                     }
                 } else {
                 // 展板模式：完整控制

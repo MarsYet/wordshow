@@ -51,28 +51,9 @@ fun SubtitleDisplay(
                 textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(), lineHeight = fontSize * 1.4f)
         }
 
-        Spacer(Modifier.height(16.dp))
-
-        // 控制栏
-        Row(Modifier.fillMaxWidth().padding(horizontal = 32.dp),
-            horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onPrev) {
-                Icon(Icons.Filled.SkipPrevious, "上一句", tint = textColor, modifier = Modifier.size(36.dp))
-            }
-            IconButton(onClick = onPlayPause) {
-                Icon(if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                    if (isPlaying) "暂停" else "继续",
-                    tint = textColor, modifier = Modifier.size(40.dp))
-            }
-            IconButton(onClick = onNext, enabled = hasNext) {
-                Icon(Icons.Filled.SkipNext, "下一句", tint = if (hasNext) textColor else textColor.copy(alpha = 0.3f),
-                    modifier = Modifier.size(36.dp))
-            }
-        }
-
         // 进度
         Text("$current / $total", color = textColor.copy(alpha = 0.5f), style = androidx.compose.material3.MaterialTheme.typography.labelSmall)
 
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(8.dp))
     }
 }
