@@ -29,9 +29,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -334,14 +336,16 @@ fun InputScreen(
                     }
                     Spacer(Modifier.height(12.dp))
                     if (presets.isNotEmpty()) {
-                        presets.forEach { p ->
-                            Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Text(p, modifier = Modifier.weight(1f))
-                                IconButton(onClick = {
-                                    presets = presets - p
-                                    scope.launch { repo.removePreset(p) }
-                                }) {
-                                    Icon(Icons.Filled.Delete, "删除", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
+                        LazyColumn(Modifier.heightIn(max = 300.dp)) {
+                            items(presets, key = { it }) { p ->
+                                Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Text(p, modifier = Modifier.weight(1f))
+                                    IconButton(onClick = {
+                                        presets = presets - p
+                                        scope.launch { repo.removePreset(p) }
+                                    }) {
+                                        Icon(Icons.Filled.Delete, "删除", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
+                                    }
                                 }
                             }
                         }
