@@ -53,6 +53,21 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+
+    // 从 local.properties 读取密钥（不提交到版本控制）
+    val localProps = Properties()
+    val localPropsFile = rootProject.file("local.properties")
+    if (localPropsFile.exists()) localPropsFile.inputStream().use { localProps.load(it) }
+    val sparkchainAppId = localProps.getProperty("SPARKCHAIN_APP_ID", "")
+    val sparkchainApiKey = localProps.getProperty("SPARKCHAIN_API_KEY", "")
+    val sparkchainApiSecret = localProps.getProperty("SPARKCHAIN_API_SECRET", "")
+
+    defaultConfig {
+        buildConfigField("String", "SPARKCHAIN_APP_ID", "\"$sparkchainAppId\"")
+        buildConfigField("String", "SPARKCHAIN_API_KEY", "\"$sparkchainApiKey\"")
+        buildConfigField("String", "SPARKCHAIN_API_SECRET", "\"$sparkchainApiSecret\"")
     }
 }
 

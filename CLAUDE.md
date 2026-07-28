@@ -27,7 +27,7 @@
 | 架构模式 | MVVM | ViewModel + StateFlow |
 | 最低支持 | minSdk **24** / targetSdk **36** | Android 7.0+ |
 | 本地存储 | DataStore | 用于保存设置/历史记录 |
-| 语音输入 | 系统 RecognizerIntent | 阶段一；后续可换讯飞/百度 SDK |
+| 语音输入 | 讯飞 SparkChain SDK | 已集成，替代 RecognizerIntent |
 
 ### 硬性规则
 
@@ -50,7 +50,7 @@ app/src/main/java/com/xiao/wordshow/
     └── Theme.kt             # 动态取色 + 深色/浅色主题（Material3）
 ```
 
-> 当前处于 **M0（项目初始化）** 阶段。接下来的任务是按照目标架构搭建完整的 package 骨架和 P0 功能。
+> 当前阶段：**M1–M4 功能已完成**（P0 全部跑通 + 语音输入 + 特效 + 设备适配）。M5（测试）待推进。
 
 ### 目标架构
 
@@ -113,7 +113,7 @@ DisplayScreen（渲染：滚动/静止 + 字体大小 + 特效）
 | **P0** | 跑马灯滚动 | 速度可调 |
 | **P0** | 滚动/静止切换 | 一键切换按钮 |
 | **P0** | 全屏模式 | 隐藏状态栏/导航栏 |
-| P1 | 语音输入 | 系统 RecognizerIntent |
+| P1 | 语音输入 | 讯飞 SparkChain SDK（已替换 RecognizerIntent） |
 | P1 | 字体大小调节 | 滑块或手势缩放 |
 | P2 | 文字特效 | 渐变/阴影/发光/跳动动画 |
 | P2 | 主题皮肤 | 多种配色方案 |
@@ -131,7 +131,7 @@ DisplayScreen（渲染：滚动/静止 + 字体大小 + 特效）
 | M4 | 多屏适配 + 性能优化 + UI 打磨 |
 | M5 | 测试 + 打包发布 |
 
-> 当前：**M1 开始**
+> 当前：**M1–M4 已完成，M5 待推进**
 
 ---
 
