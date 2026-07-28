@@ -16,6 +16,5 @@
 # 讯飞 SparkChain SDK
 -keep class com.iflytek.sparkchain.** {*;}
 -keep class com.iflytek.sparkchain.**
-# SparkChain 依赖 Gson
--keep class com.google.gson.** {*;}
--dontwarn com.google.gson.**
+# SparkChain 内部引用 Gson 注解但 AAR 未打包 Gson 库，避免 R8 报 missing class
+-dontwarn com.google.gson.annotations.SerializedName

@@ -142,7 +142,7 @@ E:\wordshow\
 │           │   │       └── SubtitleDisplay.kt  # 字幕卡片
 │           │   ├── settings/
 │           │   │   ├── SettingsScreen.kt   # 预设配置管理页
-│           │   │   └── SettingsViewModel.kt
+│           │   │   └── SettingsViewModel.kt  # 占位（M2/M3 TODO）
 │           │   ├── navigation/
 │           │   │   ├── Routes.kt           # 路由常量
 │           │   │   └── AppNavHost.kt       # NavHost 配置
@@ -156,8 +156,8 @@ E:\wordshow\
 │           │   ├── voice/
 │           │   │   └── VoiceRecognizer.kt  # 讯飞 ASR 封装
 │           │   └── preferences/
-│           │       ├── HistoryRepository.kt # DataStore 历史/预设/设置
-│           │       └── SettingsRepository.kt
+│           │       ├── HistoryRepository.kt # DataStore 历史/预设/设置（当前承载所有持久化逻辑）
+│           │       └── SettingsRepository.kt # 占位（M2/M3 TODO）
 │           └── util/
 │               ├── FullscreenUtil.kt       # 全屏工具
 │               ├── DeviceAdaptive.kt       # 设备自适应参数
@@ -226,14 +226,17 @@ replace(Regex("\\s+"), " ").split(Regex("(?<=[。！？!?\\n])")).map{trim}.filt
 
 **SDK 初始化（WordShowApp.kt）：**
 ```kotlin
+// 密钥通过 BuildConfig 注入，实际值存储在 local.properties（不提交到版本控制）
 SparkChainConfig.builder()
-    .appID("7a06bdcf")
-    .apiKey("642d26ae7b75787595c01fb40dc11c08")
-    .apiSecret("ODk4OTdlYjcyZWRhODgwZTkzMjYzNzg2")
+    .appID(BuildConfig.SPARKCHAIN_APP_ID)
+    .apiKey(BuildConfig.SPARKCHAIN_API_KEY)
+    .apiSecret(BuildConfig.SPARKCHAIN_API_SECRET)
     .workDir(filesDir.absolutePath + "/sparkchain")
     .logLevel(100)
 SparkChain.getInst().init(this, config)
 ```
+
+> ⚠️ 早期版本曾将密钥硬编码在源码中并提交到公开仓库，已通过 `local.properties` + `BuildConfig` 注入修复。**旧提交中的密钥仍存在于 Git 历史，需在讯飞控制台轮换。**
 
 **语音识别流程：**
 1. 用户按住 🎤 → 检查权限 → 创建 ASR 实例
@@ -336,8 +339,8 @@ implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar"))))
 
 ```
 -keep class com.iflytek.sparkchain.** {*;}
--keep class com.google.gson.** {*;}      # SparkChain 依赖 Gson
--dontwarn com.google.gson.**
+# SparkChain 内部引用 Gson 注解但 AAR 未打包 Gson 库
+-dontwarn com.google.gson.annotations.SerializedName
 ```
 
 ---
@@ -391,20 +394,22 @@ implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar"))))
 | 6 | 深浅切换需点击两次 | DataStore 异步回流覆盖手动切换 | mutableStateOf 直接驱动，DataStore 只做持久化 |
 | 7 | 字体选择无反应 | NONE 特效分支漏传 fontFamily | 统一使用 baseStyle.copy() |
 | 8 | RadioButton 点击失效 | Row clickable 和 RadioButton onClick 冲突 | 改用 TextButton + Check 图标 |
-| 9 | R8 混淆失败 | Gson 类被 R8 移除 | 添加 -keep class com.google.gson.** |
+| 9 | R8 混淆报 missing class | SparkChain 内部引用 Gson 注解但 AAR 未打包 Gson 库 | 添加 -dontwarn com.google.gson.annotations.SerializedName |
 | 10 | 滚动长文本被裁剪 | offset {} 被父容器裁剪 | graphicsLayer.translationX + wrapContentWidth(unbounded=true) |
+| 11 | API 密钥硬编码在源码中 | appID/apiKey/apiSecret 明文写在 WordShowApp.kt 并提交公开仓库 | 迁移到 local.properties + BuildConfig 注入；旧提交中的密钥需在控制台轮换 |
 
 ---
 
 ## 八、待优化事项
 
-1. 自动化测试覆盖（当前无单元测试和 UI 测试）
-2. CI/CD 流水线（GitHub Actions 构建 + 签名）
-3. 字幕导出 SRT 格式
-4. 截图分享功能
-5. 桌面 Widget 快捷入口
-6. 多语言国际化支持
-7. App 上架应用商店（需准备截图、隐私政策等）
+1. **讯飞 API 密钥轮换**：旧提交中仍包含泄露的密钥，需在讯飞开放平台控制台重新生成，并更新 `local.properties`
+2. 自动化测试覆盖（当前无单元测试和 UI 测试）
+3. CI/CD 流水线（GitHub Actions 构建 + 签名）
+4. 字幕导出 SRT 格式
+5. 截图分享功能
+6. 桌面 Widget 快捷入口
+7. 多语言国际化支持
+8. App 上架应用商店（需准备截图、隐私政策等）
 
 ---
 

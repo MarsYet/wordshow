@@ -3,6 +3,7 @@ package com.xiao.wordshow
 import android.app.Application
 import com.iflytek.sparkchain.core.SparkChain
 import com.iflytek.sparkchain.core.SparkChainConfig
+import com.xiao.wordshow.BuildConfig
 
 class WordShowApp : Application() {
 
@@ -10,9 +11,9 @@ class WordShowApp : Application() {
         super.onCreate()
 
         val config = SparkChainConfig.builder()
-            .appID("7a06bdcf")
-            .apiKey("642d26ae7b75787595c01fb40dc11c08")
-            .apiSecret("ODk4OTdlYjcyZWRhODgwZTkzMjYzNzg2")
+            .appID(BuildConfig.SPARKCHAIN_APP_ID)
+            .apiKey(BuildConfig.SPARKCHAIN_API_KEY)
+            .apiSecret(BuildConfig.SPARKCHAIN_API_SECRET)
             .workDir(filesDir.absolutePath + "/sparkchain")
             .logLevel(100) // OFF
 
